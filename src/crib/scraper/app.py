@@ -64,6 +64,7 @@ class Scrapp:
                 _log.error(f"{exc}")
 
     def scrape(self):
-        properties = itertools.chain.from_iterable(
-            scraper.scrape() for scraper in self.scrapers
-        )
+        for scraper in self.scrapers:
+            for p in scraper.scrape():
+                _log.info(f"{scraper}: {p}")
+                # _log.info(f"{scraper}: property scraped")

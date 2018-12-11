@@ -17,20 +17,30 @@ click_log.basic_config(logger)
 @click.pass_context
 def main(ctx):
     ctx.obj = {}
-    ctx.obj["CONFIG"] = {"scrapers": [{"name": "Rightmove"}]}
+    ctx.obj["CONFIG"] = {
+        "scrapers": [
+            {
+                "name": "Rightmove",
+                "searches": [
+                    "https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=USERDEFINEDAREA^{%22id%22%3A4848180}&includeLetAgreed=false"
+                ],
+            }
+        ]
+    }
 
 
 @main.group()
 @click.pass_obj
 def scrape(obj):
-    pass
+    config = obj["CONFIG"]
+    scrapp = app.Scrapp(config)
+    obj["SCRAPP"] = scrapp
 
 
 @scrape.command()
 @click.pass_obj
 def list_scrapers(obj):
-    config = obj["CONFIG"]
-    scrapp = app.Scrapp(config)
+    scrapp = obj["SCRAPP"]
     for scraper in scrapp.scraper_plugins:
         click.echo(scraper)
 
@@ -38,7 +48,13 @@ def list_scrapers(obj):
 @scrape.command()
 @click.pass_obj
 def scrapers(obj):
-    config = obj["CONFIG"]
-    scrapp = app.Scrapp(config)
+    scrapp = obj["SCRAPP"]
     for scraper in scrapp.scrapers:
         click.echo(scraper)
+
+
+@scrape.command()
+@click.pass_obj
+def run(obj):
+    scrapp = obj["SCRAPP"]
+    scrapp.scrape()

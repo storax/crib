@@ -6,13 +6,14 @@ import abc
 import cerberus
 
 
-class Scraper:
+class Scraper(metaclass=abc.ABCMeta):
     def __init__(self, config):
         super().__init__()
         schema = self.config_schema()
         validator = cerberus.Validator(schema)
         if not validator.validate(config):
             raise ConfigError(f"Invalid config for {self.name()}", validator.errors)
+        self.config = validator.document
 
     @classmethod
     @abc.abstractmethod
@@ -23,9 +24,13 @@ class Scraper:
     def name(cls):
         return cls.__name__
 
-    def __repr__(self):
+    @abc.abstractmethod
+    def scrape(self):
+        pass
+
+    def __str__(self):
         name = type(self).__name__
-        return f"{name}()"
+        return f"{name}"
 
 
 class ConfigError(Exception):

@@ -54,7 +54,14 @@ setup(
         "Topic :: Utilities",
     ],
     keywords=[],
-    install_requires=["cerberus", "click", "click_log", "pluggy"],
+    install_requires=[
+        "cerberus",
+        "click",
+        "click_log",
+        "pluggy",
+        "requests",
+        "mechanicalsoup",
+    ],
     extras_require={
         # eg:
         #   'rst': ['docutils>=0.11'],
