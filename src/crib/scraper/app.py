@@ -8,6 +8,7 @@ import pluggy
 
 from crib import hookspecs
 from .plugins import rightmove
+from .scraper import ConfigError
 
 
 _log = logging.getLogger(__name__)
@@ -21,8 +22,8 @@ def _get_plugin_manager():
     return pm
 
 
-class Scrapp():
-    def __init__(self, config :dict):
+class Scrapp:
+    def __init__(self, config: dict):
         super().__init__()
         self.config = config
         self._hook = _get_plugin_manager().hook
@@ -42,18 +43,27 @@ class Scrapp():
     @property
     def scrapers(self):
         if self._scrapers is None:
-            self.load_scrapers()
+            self._load_scrapers()
         return self._scrapers
 
-    def load_scrapers(self):
-        scraper_config = self.config.get('scrapers', [])
+    def _load_scrapers(self):
+        scraper_config = self.config.get("scrapers", [])
         self._scrapers = []
         for cfg in scraper_config:
             cfg = cfg.copy()
-            name = cfg.pop('name')
+            name = cfg.pop("name")
             try:
                 scraper = self.scraper_plugins[name]
             except KeyError:
-                _log.error(f'Scraper not found {name}')
-            else:
+                _log.error(f"Scraper not found {name}")
+                continue
+
+            try:
                 self._scrapers.append(scraper(cfg))
+            except ConfigError as exc:
+                _log.error(f"{exc}")
+
+    def scrape(self):
+        properties = itertools.chain.from_iterable(
+            scraper.scrape() for scraper in self.scrapers
+        )

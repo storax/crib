@@ -8,7 +8,7 @@ import click_log
 
 from crib.scraper import app
 
-logger = logging.getLogger('crib')
+logger = logging.getLogger("crib")
 click_log.basic_config(logger)
 
 
@@ -17,13 +17,7 @@ click_log.basic_config(logger)
 @click.pass_context
 def main(ctx):
     ctx.obj = {}
-    ctx.obj['CONFIG'] = {
-        'scrapers': [
-            {
-                'name': 'Rightmove',
-            },
-        ]
-    }
+    ctx.obj["CONFIG"] = {"scrapers": [{"name": "Rightmove"}]}
 
 
 @main.group()
@@ -35,15 +29,16 @@ def scrape(obj):
 @scrape.command()
 @click.pass_obj
 def list_scrapers(obj):
-    config = obj['CONFIG']
+    config = obj["CONFIG"]
     scrapp = app.Scrapp(config)
     for scraper in scrapp.scraper_plugins:
         click.echo(scraper)
 
+
 @scrape.command()
 @click.pass_obj
 def scrapers(obj):
-    config = obj['CONFIG']
+    config = obj["CONFIG"]
     scrapp = app.Scrapp(config)
     for scraper in scrapp.scrapers:
         click.echo(scraper)
