@@ -7,9 +7,8 @@ import logging
 import pluggy
 
 from crib import hookspecs
-
+from crib.exceptions import ConfigError
 from .plugins import rightmove
-from .scraper import ConfigError
 
 _log = logging.getLogger(__name__)
 

@@ -5,6 +5,8 @@ import abc
 
 import cerberus
 
+from crib.exceptions import ConfigError
+
 
 class Scraper(metaclass=abc.ABCMeta):
     def __init__(self, config):
@@ -31,16 +33,3 @@ class Scraper(metaclass=abc.ABCMeta):
     def __str__(self):
         name = type(self).__name__
         return f"{name}"
-
-
-class ConfigError(Exception):
-    def __init__(self, msg, errors):
-        super().__init__(msg, errors)
-        self.msg = msg
-        self.errors = errors
-
-    def __str__(self):
-        errors = "\n".join(
-            f"\t{field}: {reasons}" for field, reasons in self.errors.items()
-        )
-        return f"{self.msg}:\n{errors}"

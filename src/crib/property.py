@@ -5,6 +5,8 @@ from collections.abc import Mapping
 
 import cerberus
 
+from crib.exceptions import InvalidPropertyData
+
 
 class Property(Mapping):
     schema = {
@@ -61,16 +63,3 @@ class Property(Mapping):
 
     def __len__(self):
         return len(self._storage)
-
-
-class InvalidPropertyData(Exception):
-    def __init__(self, msg, errors):
-        super().__init__(msg, errors)
-        self.msg = msg
-        self.errors = errors
-
-    def __str__(self):
-        errors = "\n".join(
-            f"\t{field}: {reasons}" for field, reasons in self.errors.items()
-        )
-        return f"{self.msg}:\n{errors}"
