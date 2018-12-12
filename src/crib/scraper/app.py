@@ -7,9 +7,9 @@ import logging
 import pluggy
 
 from crib import hookspecs
+
 from .plugins import rightmove
 from .scraper import ConfigError
-
 
 _log = logging.getLogger(__name__)
 
@@ -66,5 +66,5 @@ class Scrapp:
     def scrape(self):
         for scraper in self.scrapers:
             for p in scraper.scrape():
-                _log.info(f"{scraper}: {p}")
-                # _log.info(f"{scraper}: property scraped")
+                # _log.info(f"{scraper}: {p}")
+                _log.info(f"{scraper}: property scraped")
