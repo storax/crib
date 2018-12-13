@@ -7,18 +7,19 @@ import logging
 import cerberus
 
 from crib import plugins
-from crib.exceptions import ConfigError, PluginNotFound, DuplicateProperty
+from crib.exceptions import ConfigError, DuplicateProperty, PluginNotFound
 
 _log = logging.getLogger(__name__)
 
 
 class Scrapp:
     _config_schema = {
-        "scrapers": {"type": "list"},
+        "scrapers": {"type": "list", "required": True},
         "repository": {
             "type": "dict",
-            "schema": {"type": {"type": "string"}},
+            "schema": {"type": {"type": "string", "required": True}},
             "allow_unknown": True,
+            "required": True,
         },
     }
 

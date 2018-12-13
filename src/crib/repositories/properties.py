@@ -8,7 +8,7 @@ import pymongo
 
 import crib
 from crib import exceptions
-from crib.property import Property
+from crib.domain.property import Property
 
 
 class PropertyRepo(metaclass=abc.ABCMeta):

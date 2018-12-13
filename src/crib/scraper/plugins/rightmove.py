@@ -11,7 +11,7 @@ import mechanicalsoup
 import requests
 
 import crib
-from crib.property import Property
+from crib.domain.property import Property
 from crib.scraper import scraper
 
 _log = logging.getLogger(__name__)

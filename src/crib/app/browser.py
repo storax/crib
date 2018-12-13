@@ -5,7 +5,7 @@ import itertools
 
 import cerberus
 
-from crib import plugins, exceptions
+from crib import exceptions, plugins
 
 
 class Browser:
