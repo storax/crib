@@ -22,3 +22,15 @@ class InvalidPropertyData(ValidationError):
 
 class ConfigError(ValidationError):
     pass
+
+
+class EntityNotFound(Exception):
+    pass
+
+
+class PluginNotFound(Exception):
+    pass
+
+
+class DuplicateProperty(Exception):
+    pass

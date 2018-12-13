@@ -4,30 +4,46 @@ Scraper application.
 import itertools
 import logging
 
-import pluggy
+import cerberus
 
-from crib import hookspecs
-from crib.exceptions import ConfigError
-from .plugins import rightmove
+from crib import plugins
+from crib.exceptions import ConfigError, PluginNotFound, DuplicateProperty
 
 _log = logging.getLogger(__name__)
 
 
-def _get_plugin_manager():
-    pm = pluggy.PluginManager("crib")
-    pm.add_hookspecs(hookspecs)
-    pm.load_setuptools_entrypoints("crib")
-    pm.register(rightmove)
-    return pm
-
-
 class Scrapp:
+    _config_schema = {
+        "scrapers": {"type": "list"},
+        "repository": {
+            "type": "dict",
+            "schema": {"type": {"type": "string"}},
+            "allow_unknown": True,
+        },
+    }
+
     def __init__(self, config: dict):
         super().__init__()
-        self.config = config
-        self._hook = _get_plugin_manager().hook
+        self.config = self._validate_config(config)
+        self._hook = plugins.hook
         self._scraper_plugins = None
         self._scrapers = None
+        self.repository = self._open_repository()
+
+    def _validate_config(self, config):
+        validator = cerberus.Validator(self._config_schema, allow_unknown=True)
+        if not validator.validate(config):
+            raise ConfigError(f"Invalid config", validator.errors)
+        return validator.document
+
+    def _open_repository(self):
+        repo_config = self.config["repository"].copy()
+        repo_type = repo_config.pop("type")
+        repo_plugins = self._hook.crib_add_property_repos()
+        for repo in itertools.chain(*repo_plugins):
+            if repo.name() == repo_type:
+                return repo(repo_config)
+        raise PluginNotFound("Repository {repo_type} plugin not found")
 
     @property
     def scraper_plugins(self):
@@ -46,7 +62,7 @@ class Scrapp:
         return self._scrapers
 
     def _load_scrapers(self):
-        scraper_config = self.config.get("scrapers", [])
+        scraper_config = self.config["scrapers"]
         self._scrapers = []
         for cfg in scraper_config:
             cfg = cfg.copy()
@@ -65,5 +81,8 @@ class Scrapp:
     def scrape(self):
         for scraper in self.scrapers:
             for p in scraper.scrape():
-                # _log.info(f"{scraper}: {p}")
-                _log.info(f"{scraper}: property scraped")
+                _log.debug(f"{scraper}: property scraped")
+                try:
+                    self.repository.insert(p)
+                except DuplicateProperty:
+                    pass

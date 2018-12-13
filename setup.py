@@ -56,6 +56,7 @@ setup(
         "pluggy",
         "requests",
         "mechanicalsoup",
+        "pymongo",
         "pyyaml",
     ],
     extras_require={
