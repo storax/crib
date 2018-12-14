@@ -2,14 +2,16 @@
 Exceptions
 """
 
+from typing import Dict
+
 
 class ValidationError(Exception):
-    def __init__(self, msg, errors):
+    def __init__(self, msg: str, errors: Dict) -> None:
         super().__init__(msg, errors)
         self.msg = msg
         self.errors = errors
 
-    def __str__(self):
+    def __str__(self) -> str:
         errors = "\n".join(
             f"\t{field}: {reasons}" for field, reasons in self.errors.items()
         )

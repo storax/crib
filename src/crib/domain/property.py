@@ -2,14 +2,15 @@
 Property model
 """
 from collections.abc import Mapping
+from typing import Any, Dict, Iterator, List, Union
 
-import cerberus
+import cerberus  # type: ignore
 
 from crib.exceptions import InvalidPropertyData
 
 
 class Property(Mapping):
-    schema = {
+    schema: Dict[str, Dict[str, Union[str, Dict]]] = {
         "bedrooms": {"type": "integer"},
         "displayAddress": {"type": "string"},
         "featuredProperty": {"type": "boolean"},
@@ -44,22 +45,22 @@ class Property(Mapping):
         "transactionType": {"type": "string"},
     }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__()
         data = dict(*args, **kwargs)
         self._storage = self._validate(data)
 
-    def _validate(self, data):
+    def _validate(self, data: Dict) -> Dict[str, Any]:
         validator = cerberus.Validator(self.schema)
         if not validator.validate(data):
             raise InvalidPropertyData(f"Invalid property data", validator.errors)
         return validator.document
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str):
         return self._storage[key]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         return iter(self._storage)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._storage)

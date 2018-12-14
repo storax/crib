@@ -2,9 +2,10 @@
 Simple crud repository base class
 """
 import abc
+from typing import Any, Dict, Iterable, Type, TypeVar
 
-import cerberus
-import pymongo
+import cerberus  # type: ignore
+import pymongo  # type: ignore
 
 import crib
 from crib import exceptions
@@ -12,7 +13,7 @@ from crib.domain.property import Property
 
 
 class PropertyRepo(metaclass=abc.ABCMeta):
-    def __init__(self, config):
+    def __init__(self, config: Dict) -> None:
         super().__init__()
         schema = self.config_schema()
         validator = cerberus.Validator(schema)
@@ -23,72 +24,72 @@ class PropertyRepo(metaclass=abc.ABCMeta):
         self.config = validator.document
 
     @classmethod
-    def name(cls):
+    def name(cls) -> str:
         return cls.__name__
 
     @classmethod
-    def config_schema(cls):
+    def config_schema(cls) -> Dict[str, Any]:
         return {}
 
     @abc.abstractmethod
-    def insert(self, prop):
+    def insert(self, prop: Property) -> None:
         pass
 
     @abc.abstractmethod
-    def get(self, identity: str):
+    def get(self, identity: str) -> Property:
         pass
 
     @abc.abstractmethod
-    def get_all(self):
+    def get_all(self) -> Iterable[Property]:
         pass
 
     @abc.abstractmethod
-    def delete(self, identity: str):
+    def delete(self, identity: str) -> None:
         pass
 
     @abc.abstractmethod
-    def count(self):
+    def count(self) -> int:
         pass
 
 
 class MemoryPropertyRepo(PropertyRepo):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self._storage = {}
+        self._storage: Dict[str, Property] = {}
 
-    def insert(self, prop):
+    def insert(self, prop: Property) -> None:
         if prop["id"] in self._storage:
             raise exceptions.DuplicateProperty(prop)
         self._storage[prop["id"]] = prop
 
-    def get(self, identity: str):
+    def get(self, identity: str) -> Property:
         try:
             return self._storage[identity]
         except KeyError:
             raise exceptions.EntityNotFound(identity)
 
-    def get_all(self):
+    def get_all(self) -> Iterable[Property]:
         for p in self._storage.values():
             yield p
 
-    def delete(self, identity: str):
+    def delete(self, identity: str) -> None:
         try:
             del self._storage[identity]
         except KeyError:
             raise exceptions.EntityNotFound(identity)
 
-    def count(self):
+    def count(self) -> int:
         return len(self._storage)
 
 
 class MongoPropertyRepo(PropertyRepo):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._client = pymongo.MongoClient(**self.config["connection"])
         self._db = self._client[self.config["database"]]
 
     @classmethod
-    def config_schema(cls):
+    def config_schema(cls) -> Dict[str, Any]:
         return {
             "connection": {
                 "type": "dict",
@@ -108,38 +109,42 @@ class MongoPropertyRepo(PropertyRepo):
     def _props(self):
         return self._db.properties
 
-    def _to_prop(self, data):
+    def _to_prop(self, data: Dict[str, Any]) -> Property:
         data.pop("_id")
         return Property(data)
 
-    def insert(self, prop):
-        prop = dict(prop)
-        prop["_id"] = prop["id"]
+    def insert(self, prop: Property) -> None:
+        p = dict(prop)
+        p["_id"] = p["id"]
         try:
-            self._props.insert_one(prop)
+            self._props.insert_one(p)
         except pymongo.errors.DuplicateKeyError:
-            raise exceptions.DuplicateProperty(prop)
+            raise exceptions.DuplicateProperty(p)
 
-    def get(self, identity: str):
+    def get(self, identity: str) -> Property:
         data = self._props.find_one({"_id": identity})
         prop = self._to_prop(data)
         if prop is None:
-            raise EntityNotFound(identity)
+            raise exceptions.EntityNotFound(identity)
         return prop
 
-    def get_all(self):
+    def get_all(self) -> Iterable[Property]:
         for data in self._props.find():
             yield self._to_prop(data)
 
-    def delete(self, identity: str):
+    def delete(self, identity: str) -> None:
         result = self._props.delete_one({"_id": identity})
         if result.deleted_count == 0:
-            raise EntityNotFound(identity)
+            raise exceptions.EntityNotFound(identity)
 
-    def count(self):
+    def count(self) -> int:
         return self._props.count()
 
 
+PR = TypeVar("PR", bound=PropertyRepo)
+TPR = Type[PR]
+
+
 @crib.hookimpl
-def crib_add_property_repos():
+def crib_add_property_repos() -> Iterable[TPR]:
     return [MemoryPropertyRepo, MongoPropertyRepo]
