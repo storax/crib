@@ -50,53 +50,7 @@ class Rightmove(scraper.Scraper):
                     model = self._load_page(browser, url)
                     page.properties.extend(model["properties"])
                 properties = page.properties
-                yield from (self._to_prop(p) for p in properties)
-
-    @staticmethod
-    def _to_prop(data: Dict) -> Property:
-        keys = (
-            "bedrooms",
-            "displayAddress",
-            "featuredProperty",
-            "feesApply",
-            "feesApplyText",
-            "firstVisibleDate",
-            "id",
-            "location",
-            "price",
-            "propertyImages",
-            "propertySubType",
-            "propertyTypeFullDescription",
-            "propertyUrl",
-            "students",
-            "summary",
-            "transactionType",
-        )
-        dtc = lambda x: datetime.datetime.strptime(x, "%Y-%m-%dT%H:%M:%S%z")
-
-        def imgc(images: Dict) -> List[Dict[str, str]]:
-            images = images["images"]
-            return [
-                {"order": img["order"], "url": img["mediaServerHost"] + img["url"]}
-                for img in images
-            ]
-
-        identity = lambda x: x
-
-        conversions = {
-            "firstVisibleDate": dtc,
-            "id": lambda x: f"RM-{x}",
-            "propertyImages": imgc,
-            "price": lambda x: {
-                k: x[k] for k in ("amount", "currencyCode", "frequency")
-            },
-            "propertyUrl": lambda x: "https://rightmove.co.uk" + x,
-            "feesApplyText": lambda x: x or "",
-        }
-
-        d = {k: conversions.get(k, identity)(data[k]) for k in keys}
-
-        return Property(d)
+                yield from (to_prop(p) for p in properties)
 
     @staticmethod
     def _get_pages(model: Dict) -> List[Page]:
@@ -120,6 +74,50 @@ class Rightmove(scraper.Scraper):
         parsed = list(qr)
         parsed[4] = query
         return parse.urlunparse(parsed)
+
+
+def to_prop(data: Dict) -> Property:
+    keys = (
+        "bedrooms",
+        "displayAddress",
+        "featuredProperty",
+        "feesApply",
+        "feesApplyText",
+        "firstVisibleDate",
+        "id",
+        "location",
+        "price",
+        "propertyImages",
+        "propertySubType",
+        "propertyTypeFullDescription",
+        "propertyUrl",
+        "students",
+        "summary",
+        "transactionType",
+    )
+    dtc = lambda x: datetime.datetime.strptime(x, "%Y-%m-%dT%H:%M:%S%z")
+
+    def imgc(images: Dict) -> List[Dict[str, str]]:
+        images = images["images"]
+        return [
+            {"order": img["order"], "url": img["mediaServerHost"] + img["url"]}
+            for img in images
+        ]
+
+    identity = lambda x: x
+
+    conversions = {
+        "firstVisibleDate": dtc,
+        "id": lambda x: f"RM-{x}",
+        "propertyImages": imgc,
+        "price": lambda x: {k: x[k] for k in ("amount", "currencyCode", "frequency")},
+        "propertyUrl": lambda x: "https://rightmove.co.uk" + x,
+        "feesApplyText": lambda x: x or "",
+    }
+
+    d = {k: conversions.get(k, identity)(data[k]) for k in keys}
+
+    return Property(d)
 
 
 class Page(NamedTuple):
