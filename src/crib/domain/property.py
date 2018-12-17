@@ -11,38 +11,48 @@ from crib.exceptions import InvalidPropertyData
 
 class Property(Mapping):
     schema: Dict[str, Dict[str, Union[str, Dict]]] = {
-        "bedrooms": {"type": "integer"},
-        "displayAddress": {"type": "string"},
+        "bedrooms": {"type": "integer", "required": True},
+        "displayAddress": {"type": "string", "required": True},
         "featuredProperty": {"type": "boolean"},
-        "feesApply": {"type": "boolean"},
+        "feesApply": {"type": "boolean", "required": True},
         "feesApplyText": {"type": "string"},
-        "firstVisibleDate": {"type": "datetime"},
-        "id": {"type": "string"},
+        "firstVisibleDate": {"type": "datetime", "required": True},
+        "id": {"type": "string", "required": True},
         "location": {
             "type": "dict",
-            "schema": {"latitude": {"type": "float"}, "longitude": {"type": "float"}},
+            "schema": {
+                "latitude": {"type": "float", "required": True},
+                "longitude": {"type": "float", "required": True},
+            },
+            "required": True,
         },
         "price": {
             "type": "dict",
             "schema": {
-                "amount": {"type": "integer"},
-                "currencyCode": {"type": "string"},
-                "frequency": {"type": "string"},
+                "amount": {"type": "integer", "required": True},
+                "currencyCode": {"type": "string", "required": True},
+                "frequency": {"type": "string", "required": True},
             },
+            "required": True,
         },
         "propertyImages": {
             "type": "list",
-            "schema": {
-                "type": "dict",
-                "schema": {"order": {"type": "integer"}, "url": {"type": "string"}},
-            },
+            "schema": {"type": "string"},
+            "required": True,
         },
-        "propertySubType": {"type": "string"},
-        "propertyTypeFullDescription": {"type": "string"},
-        "propertyUrl": {"type": "string"},
-        "students": {"type": "boolean"},
-        "summary": {"type": "string"},
-        "transactionType": {"type": "string"},
+        "floorplanImages": {
+            "type": "list",
+            "schema": {"type": "string"},
+            "required": True,
+        },
+        "propertySubType": {"type": "string", "required": True},
+        "propertyTypeFullDescription": {"type": "string", "required": True},
+        "propertyUrl": {"type": "string", "required": True},
+        "students": {"type": "boolean", "required": True},
+        "summary": {"type": "string", "required": True},
+        "transactionType": {"type": "string", "required": True},
+        "keyFeatures": {"type": "list", "schema": {"type": "string"}, "required": True},
+        "lettingInformation": {"type": "dict", "required": True},
     }
 
     def __init__(self, *args, **kwargs) -> None:
@@ -64,3 +74,6 @@ class Property(Mapping):
 
     def __len__(self) -> int:
         return len(self._storage)
+
+    def __str__(self) -> str:
+        return f"{self._storage}"

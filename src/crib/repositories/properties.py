@@ -2,6 +2,7 @@
 Simple crud repository base class
 """
 import abc
+import itertools
 from typing import Any, Dict, Iterable, Type, TypeVar
 
 import cerberus  # type: ignore
@@ -40,6 +41,10 @@ class PropertyRepo(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    def exists(self, identity: str) -> bool:
+        pass
+
+    @abc.abstractmethod
     def get_all(self) -> Iterable[Property]:
         pass
 
@@ -61,6 +66,9 @@ class MemoryPropertyRepo(PropertyRepo):
         if prop["id"] in self._storage:
             raise exceptions.DuplicateProperty(prop)
         self._storage[prop["id"]] = prop
+
+    def exists(self, identity: str) -> bool:
+        return identity in self._storage
 
     def get(self, identity: str) -> Property:
         try:
@@ -112,6 +120,9 @@ class MongoPropertyRepo(PropertyRepo):
     def _to_prop(self, data: Dict[str, Any]) -> Property:
         data.pop("_id")
         return Property(data)
+
+    def exists(self, identity: str) -> bool:
+        return bool(self._props.find_one({"_id": identity}))
 
     def insert(self, prop: Property) -> None:
         p = dict(prop)
