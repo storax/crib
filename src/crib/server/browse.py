@@ -10,5 +10,5 @@ bp = Blueprint("browse", __name__)
 
 @bp.route("/", methods=("GET",))
 @login_required
-def view():
-    return render_template("browse/view.html")
+def index():
+    return render_template("browse/index.html")
