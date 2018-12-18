@@ -21,5 +21,5 @@ class WithRepo(WithConfig):
     @classmethod
     def from_crawler(cls, crawler):
         instance = super(WithRepo, cls).from_crawler(crawler)
-        instance.repo = app.get_repository(instance.config)
+        instance.repo = app.get_property_repository(instance.config)
         return instance

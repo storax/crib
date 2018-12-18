@@ -22,6 +22,10 @@ class InvalidPropertyData(ValidationError):
     pass
 
 
+class InvalidUserData(ValidationError):
+    pass
+
+
 class ConfigError(ValidationError):
     pass
 
@@ -35,4 +39,8 @@ class PluginNotFound(Exception):
 
 
 class DuplicateProperty(Exception):
+    pass
+
+
+class DuplicateUser(Exception):
     pass

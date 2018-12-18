@@ -2,7 +2,6 @@
 Simple crud repository base class
 """
 import abc
-import itertools
 from typing import Any, Dict, Iterable, Type, TypeVar
 
 import cerberus  # type: ignore
@@ -134,9 +133,10 @@ class MongoPropertyRepo(PropertyRepo):
 
     def get(self, identity: str) -> Property:
         data = self._props.find_one({"_id": identity})
-        prop = self._to_prop(data)
-        if prop is None:
+        if data is None:
             raise exceptions.EntityNotFound(identity)
+
+        prop = self._to_prop(data)
         return prop
 
     def get_all(self) -> Iterable[Property]:

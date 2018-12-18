@@ -10,9 +10,12 @@ from typing import IO, Any, Dict, List
 
 import click
 import click_log  # type: ignore
+from flask import Flask, current_app
+from flask.cli import FlaskGroup, ScriptInfo
 from scrapy.cmdline import execute  # type: ignore
 
 from crib import app, exceptions
+from crib.server import create_app
 
 _log = logging.getLogger("crib")
 click_log.basic_config(_log)
@@ -20,6 +23,7 @@ click_log.basic_config(_log)
 
 class Context:
     config: Dict[str, Any]
+    script_info: ScriptInfo
 
 
 @click.group()
@@ -64,7 +68,7 @@ def browse(obj: Context) -> None:
     """Browse properties"""
     from pprint import pprint as pp
 
-    repo = app.get_repository(obj.config)
+    repo = app.get_property_repository(obj.config)
     props = repo._props
     _console = code.InteractiveConsole(locals())
     try:
@@ -75,3 +79,27 @@ def browse(obj: Context) -> None:
     else:
         readline.parse_and_bind("tab: complete")
     _console.interact(banner="You can access the repository via the 'repo' variable.")
+
+
+def create_app_wrapper(*args, **kwargs):
+    ctx = click.get_current_context()
+    cfg = ctx.find_object(Context).config
+    return create_app(cfg)
+
+
+@main.group(
+    cls=FlaskGroup,
+    create_app=create_app_wrapper,
+    context_settings={"obj": ScriptInfo(create_app=create_app_wrapper)},
+)
+def server():
+    """Run the crib server."""
+
+
+@server.command()
+@click.pass_context
+def run(ctx):
+    cfg = ctx.find_object(Context).config
+    current_app.prop_repo = app.get_property_repository(cfg)
+    current_app.user_repo = app.get_user_repository(cfg)
+    current_app.run()

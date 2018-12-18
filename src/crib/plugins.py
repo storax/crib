@@ -3,13 +3,15 @@ from typing import List, Type, TypeVar
 import pluggy  # type: ignore
 
 from crib import config
-from crib.repositories import properties
+from crib.repositories import properties, user
 
 hookspec = pluggy.HookspecMarker("crib")
 
 
 PR = TypeVar("PR", bound=properties.PropertyRepo)
 TPR = Type[PR]
+UR = TypeVar("UR", bound=user.UserRepo)
+TUR = Type[UR]
 
 
 class CribSpec:
@@ -18,6 +20,14 @@ class CribSpec:
         """Add scraper plugins
 
         :return: a list of PropertyRepos
+        """
+        return []
+
+    @hookspec
+    def crib_add_user_repos(self) -> List[TUR]:
+        """Add scraper plugins
+
+        :return: a list of UserRepos
         """
         return []
 
@@ -36,6 +46,7 @@ def _init_plugin_manager() -> pluggy.PluginManager:
     pm.load_setuptools_entrypoints("crib")
     pm.register(config)
     pm.register(properties)
+    pm.register(user)
     return pm
 
 

@@ -53,6 +53,7 @@ setup(
         "cerberus",
         "click",
         "click_log",
+        "flask",
         "pluggy",
         "scrapy",
         "pymongo",

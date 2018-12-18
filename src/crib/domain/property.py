@@ -2,7 +2,7 @@
 Property model
 """
 from collections.abc import Mapping
-from typing import Any, Dict, Iterator, List, Union
+from typing import Any, Dict, Iterator, Union
 
 import cerberus  # type: ignore
 
