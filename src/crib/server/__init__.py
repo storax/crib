@@ -5,13 +5,17 @@ import os
 
 import flask
 
-from . import auth, browse, properties
+from . import auth, properties, spa
 
 
 def create_app(config):
     # create and configure the app
     app = flask.Flask(__name__)
-    app.config.from_mapping(SECRET_KEY="dev")
+    app.config.from_mapping(
+        JWT_SECRET_KEY="dev",
+        JWT_BLACKLIST_ENABLED=True,
+        JWT_BLACKLIST_TOKEN_CHECKS=["access", "refresh"],
+    )
 
     app.config.from_mapping(config)
 
@@ -21,9 +25,9 @@ def create_app(config):
     except OSError:
         pass
 
-    app.register_blueprint(auth.bp)
-    app.register_blueprint(browse.bp)
     app.register_blueprint(properties.bp)
-    app.add_url_rule("/", endpoint="index")
+    app.register_blueprint(spa.bp)
+    app.add_url_rule("/", endpoint="spa.index")
+    auth.init_app(app)
 
     return app

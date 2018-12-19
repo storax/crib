@@ -1,15 +1,12 @@
-import functools
-
-from flask import (
-    Blueprint,
-    current_app,
-    flash,
-    g,
-    redirect,
-    render_template,
-    request,
-    session,
-    url_for,
+from flask import Blueprint, current_app, jsonify, request
+from flask_jwt_extended import (
+    JWTManager,
+    create_access_token,
+    create_refresh_token,
+    get_jwt_identity,
+    get_raw_jwt,
+    jwt_refresh_token_required,
+    jwt_required,
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -18,81 +15,96 @@ from crib.domain.user import User
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
+blacklist = set()
 
-@bp.route("/register", methods=("GET", "POST"))
+jwt = JWTManager()
+
+
+def init_app(app):
+    app.register_blueprint(bp)
+    jwt.init_app(app)
+
+
+@jwt.token_in_blacklist_loader
+def check_if_token_in_blacklist(decrypted_token):
+    jti = decrypted_token["jti"]
+    return jti in blacklist
+
+
+@bp.route("/register", methods=("POST",))
 def register():
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-        repo = current_app.user_repo
-        error = None
-
-        if not username:
-            error = "Username is required."
-        elif not password:
-            error = "Password is required."
-
-        user = User(username=username, password=generate_password_hash(password))
-        try:
-            repo.add_user(user)
-        except exceptions.DuplicateUser:
-            error = f"User {username} is already registered."
-        else:
-            return redirect(url_for("auth.login"))
-
-        flash(error)
-
-    return render_template("auth/register.html")
-
-
-@bp.route("/login", methods=("GET", "POST"))
-def login():
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-        repo = current_app.user_repo
-        error = None
-        try:
-            user = repo.get_user(username)
-        except exceptions.EntityNotFound:
-            error = "Incorrect username"
-        else:
-            if not check_password_hash(user["password"], password):
-                error = "Incorrect password"
-
-        if error is None:
-            session.clear()
-            session["username"] = user["username"]
-            return redirect(url_for("index"))
-
-        flash(error)
-
-    return render_template("auth/login.html")
-
-
-@bp.before_app_request
-def load_logged_in_user():
+    username = request.form["username"]
+    password = request.form["password"]
     repo = current_app.user_repo
-    username = session.get("username")
+    error = None
 
-    if username is None:
-        g.user = None
-    else:
-        g.user = repo.get_user(username)
+    if not username:
+        error = "Username is required."
+    elif not password:
+        error = "Password is required."
+
+    if error:
+        return jsonify({"msg": error}), 400
+
+    user = User(username=username, password=generate_password_hash(password))
+    try:
+        repo.add_user(user)
+    except exceptions.DuplicateUser:
+        error = f"User {username} is already registered."
+        return jsonify({"msg": error}), 409
+
+    return jsonify({"username": username}), 201
 
 
-@bp.route("/logout")
+@bp.route("/login", methods=("POST",))
+def login():
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+
+    username = request.json.get("username", None)
+    password = request.json.get("password", None)
+    if not username:
+        return jsonify({"msg": "Missing username parameter"}), 400
+    if not password:
+        return jsonify({"msg": "Missing password parameter"}), 400
+
+    repo = current_app.user_repo
+    invalid_msg = jsonify({"msg": "Invalid Credentials"}), 401
+    try:
+        user = repo.get_user(username)
+    except exceptions.EntityNotFound:
+        return invalid_msg
+
+    if not check_password_hash(user["password"], password):
+        return invalid_msg
+    ret = {
+        "access_token": create_access_token(identity=username),
+        "refresh_token": create_refresh_token(identity=username),
+    }
+    return jsonify(ret), 200
+
+
+@bp.route("/refresh", methods=("POST",))
+@jwt_refresh_token_required
+def refresh():
+    current_user = get_jwt_identity()
+    ret = {"access_token": create_access_token(identity=current_user)}
+    return jsonify(ret), 200
+
+
+# Endpoint for revoking the current users access token
+@bp.route("/logout", methods=("DELETE",))
+@jwt_required
 def logout():
-    session.clear()
-    return redirect(url_for("index"))
+    jti = get_raw_jwt()["jti"]
+    blacklist.add(jti)
+    return jsonify({"msg": "Successfully logged out"}), 200
 
 
-def login_required(view):
-    @functools.wraps(view)
-    def wrapped_view(**kwargs):
-        if g.user is None:
-            return redirect(url_for("auth.login"))
-
-        return view(**kwargs)
-
-    return wrapped_view
+# Endpoint for revoking the current users refresh token
+@bp.route("/logout2", methods=("DELETE",))
+@jwt_refresh_token_required
+def logout2():
+    jti = get_raw_jwt()["jti"]
+    blacklist.add(jti)
+    return jsonify({"msg": "Successfully logged out"}), 200

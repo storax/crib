@@ -58,6 +58,7 @@ setup(
         "scrapy",
         "pymongo",
         "pyyaml",
+        "flask-jwt-extended",
     ],
     extras_require={
         # eg:
