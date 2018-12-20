@@ -33,8 +33,11 @@ def check_if_token_in_blacklist(decrypted_token):
 
 @bp.route("/register", methods=("POST",))
 def register():
-    username = request.form["username"]
-    password = request.form["password"]
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+
+    username = request.json.get("username", None)
+    password = request.json.get("password", None)
     repo = current_app.user_repo
     error = None
 

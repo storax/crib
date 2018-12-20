@@ -1,6 +1,6 @@
 var spahome = Vue.component("Home", {
     template: `
-    <v-jumbotron color="grey lighten-2">
+    <div color="grey lighten-2">
         <v-container fill-height>
             <v-layout align-center>
                 <v-flex>
@@ -12,7 +12,7 @@ var spahome = Vue.component("Home", {
                 </v-flex>
             </v-layout>
         </v-container>
-    </v-jumbotron>
+    </div>
   `,
     props: ["title"],
     $_veeValidate: {
