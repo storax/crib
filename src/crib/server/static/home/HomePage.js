@@ -1,4 +1,4 @@
-var spahome = Vue.component("Home", {
+export const HomePage = Vue.component("Home", {
     template: `
     <div color="grey lighten-2">
         <v-container fill-height>

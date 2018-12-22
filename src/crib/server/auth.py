@@ -80,9 +80,11 @@ def login():
 
     if not check_password_hash(user["password"], password):
         return invalid_msg
+
     ret = {
         "access_token": create_access_token(identity=username),
         "refresh_token": create_refresh_token(identity=username),
+        "username": username,
     }
     return jsonify(ret), 200
 

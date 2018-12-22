@@ -6,16 +6,10 @@
         <title>Crib</title>
         <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
         <link href="https://unpkg.com/vuetify@1.0.17/dist/vuetify.min.css" rel="stylesheet">
+        <link href="/static/style.css" rel="stylesheet">
     </head>
     <body>
-        <div class="container body-content">
-            <div id="app" v-cloak>
-                <v-app>
-                    <crib-toolbar :title="msg"></crib-toolbar>
-                    <router-view></router-view>
-                </v-app>
-            </div>
-        </div>
+        <div id="app"></div>
 
         <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/moment@2.20.1/moment.min.js"></script>
@@ -27,12 +21,6 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/vuex/3.0.1/vuex.min.js"></script>
         <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
         <!-- Vue Pages and Components here -->
-        <script src='/static/auth.js'></script>
-        <script src='/static/utils.js'></script>
-        <script src='/static/store.js'></script>
-        <script src='/static/login.vue.js'></script>
-        <script src='/static/home.vue.js'></script>
-        <script src='/static/toolbar.vue.js'></script>
-        <script src='/static/main.js'></script>
+        <script type="module" src='/static/index.js'></script>
     </body>
 </html>
