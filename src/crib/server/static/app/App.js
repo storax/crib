@@ -2,16 +2,18 @@ import toolbar from '../toolbar/index.js';
 
 const App = Vue.component("app", {
   template: `
-<div class="container body-content">
+<div class="body-content">
   <v-app>
     <crib-toolbar :title="msg"></crib-toolbar>
-    <v-alert
+<v-container fluid style="{margin: 0px; padding: 0px;}">
+    <v-alert shrink
       :value="alert.message"
       :type="alert.type"
       transition="scale-transition">
       {{alert.message}}
     </v-alert>
     <router-view></router-view>
+</v-container>
    </v-app>
 </div>
 `,

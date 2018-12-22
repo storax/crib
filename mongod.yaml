@@ -1,0 +1,14 @@
+processManagement:
+   fork: true
+   pidFilePath: /tmp/mongodb.pid
+net:
+   bindIp: localhost
+   port: 27017
+storage:
+   dbPath: /media/data/heavy/mongodb/crib
+   journal:
+      enabled: true
+systemLog:
+   destination: file
+   path: "/media/data/heavy/mongodb/crib/mongod.log"
+   logAppend: true
