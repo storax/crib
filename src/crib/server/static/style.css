@@ -29,3 +29,4 @@ input[type=submit] { align-self: start; min-width: 10em; }
 }
 .body-content { background: white; }
 .login-container { width: 40%; margin: 0 auto;}
+/* .map-container { width: 100%; margin: 0 auto;} */

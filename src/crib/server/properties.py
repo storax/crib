@@ -11,7 +11,6 @@ bp = Blueprint("properties", __name__, url_prefix="/properties")
 @jwt_required
 def locations():
     locations = [
-        [p["location"]["latitude"], p["location"]["longitude"]]
-        for p in current_app.prop_repo.get_all()
+        dict(p) for p in current_app.prop_repo.get_x(100)
     ]
     return jsonify(locations)

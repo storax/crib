@@ -143,6 +143,10 @@ class MongoPropertyRepo(PropertyRepo):
         for data in self._props.find():
             yield self._to_prop(data)
 
+    def get_x(self, x) -> Iterable[Property]:
+        for data in self._props.find().limit(x):
+            yield self._to_prop(data)
+
     def delete(self, identity: str) -> None:
         result = self._props.delete_one({"_id": identity})
         if result.deleted_count == 0:
