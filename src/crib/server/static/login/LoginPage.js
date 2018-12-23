@@ -34,7 +34,7 @@ export const LoginPage = Vue.component("Login", {
   </v-form>
 </v-flex>
 </v-layout>
-<v-container>
+</v-container>
 `,
   props: [],
   data: function () {

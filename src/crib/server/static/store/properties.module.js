@@ -3,35 +3,35 @@ import { propertiesService } from '../services/index.js';
 export const properties = {
   namespaced: true,
   state: {
-    gettingLocations: false,
-    locations: []
+    gettingProperties: false,
+    properties: []
   },
   actions: {
-    getLocations({ commit }) {
-      commit('locationsRequest');
+    getProperties({ commit }) {
+      commit('propertyRequest');
 
-      propertiesService.locations()
+      propertiesService.find()
         .then(
-          locations => {
-            commit('setLocations', locations);
+          properties => {
+            commit('setProperties', properties);
           },
           error => {
-            commit('locationsError', error);
-            dispatch('alert/error', error, {root: true});
+            commit('propertiesError', error);
+            dispatch('alert/error', error.message, {root: true});
           }
         );
     }
   },
   mutations: {
-    locationsRequest(state) {
-      state.gettingLocations = true;
+    propertyRequest(state) {
+      state.gettingProperties = true;
     },
-    setLocations(state, locations) {
-      state.gettingLocations = false;
-      state.locations = locations;
+    setProperties(state, properties) {
+      state.gettingProperties = false;
+      state.properties = properties;
     },
-    locationsError(state) {
-      state.gettingLocations = false;
+    propertiesError(state) {
+      state.gettingProperties = false;
     }
   }
 }

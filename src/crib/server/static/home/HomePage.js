@@ -7,19 +7,32 @@ Vue.component('l-tooltip', window.Vue2Leaflet.LTooltip);
 export const HomePage = Vue.component("Home", {
     template: `
 <v-container class="pa-0" fluid fill-height>
-        <v-layout>
-            <v-flex x12>
-                <l-map ref="map" v-resize="onResize" :zoom="zoom" :center="center">
-                  <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
-                  <l-marker
-                    v-for="item in markers"
-                    :lat-lng="[item.location.latitude, item.location.longitude]"
-                    :key="item.id">
-                    <l-popup > {{ item.price.amount }} {{ item.price.frequency}}</l-popup>
-                    <l-tooltip >£{{ item.price.amount }} {{ item.price.frequency}}</l-tooltip>
-                  </l-marker>
-                </l-map>
+        <v-layout column>
+          <v-flex shrink>
+            <v-progress-linear
+              class="ma-0"
+              v-if="gettingProperties"
+              color="secondary"
+              :indeterminate="true">
+            </v-progress-linear>
+          </v-flex>
+          <v-layout row>
+            <v-flex md4 d-flex>
+<pre>{{ propertiesJSON }} </pre>
             </v-flex>
+            <v-flex grow d-flex>
+              <l-map ref="map" v-resize="onResize" :zoom="zoom" :center="center">
+                <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
+                <l-marker
+                  v-for="item in properties"
+                  :lat-lng="[item.location.latitude, item.location.longitude]"
+                  :key="item.id">
+                  <l-popup > {{ item.price.amount }} {{ item.price.frequency}}</l-popup>
+                  <l-tooltip >£{{ item.price.amount }} {{ item.price.frequency}}</l-tooltip>
+                </l-marker>
+              </l-map>
+            </v-flex>
+          </v-layout>
         </v-layout>
 </v-container>
   `,
@@ -52,11 +65,17 @@ export const HomePage = Vue.component("Home", {
     }
   },
   computed: {
-    markers: function () {
-      return this.$store.state.properties.locations;
+    propertiesJSON: function () {
+      return JSON.stringify(this.$store.state.properties.properties, undefined, 2);
+    },
+    properties: function () {
+      return this.$store.state.properties.properties;
+    },
+    gettingProperties: function () {
+      return this.$store.state.properties.gettingProperties;
     }
   },
     beforeMount: function () {
-    this.$store.dispatch('properties/getLocations');
+    this.$store.dispatch('properties/getProperties');
   },
 });

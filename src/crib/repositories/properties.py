@@ -139,13 +139,31 @@ class MongoPropertyRepo(PropertyRepo):
         prop = self._to_prop(data)
         return prop
 
-    def get_all(self) -> Iterable[Property]:
+    def get_all(self):
         for data in self._props.find():
             yield self._to_prop(data)
 
-    def get_x(self, x) -> Iterable[Property]:
-        for data in self._props.find().limit(x):
+    def find(self, order_by=(), limit=1000) -> Iterable[Property]:
+        queried_props = self._props.find()
+        if order_by:
+            order_by = [(field, self._to_order(i)) for field, i in order_by]
+            queried_props = queried_props.sort(order_by)
+        if limit:
+            queried_props = queried_props.limit(limit)
+
+        for data in queried_props:
             yield self._to_prop(data)
+
+    @staticmethod
+    def _to_order(x):
+        if x == 1:
+            return pymongo.ASCENDING
+        elif x == -1:
+            return pymongo.DESCENDING
+        else:
+            raise exceptions.UnknownOrder(
+                "Order has to be either 1 for ascending or -1 for descending."
+            )
 
     def delete(self, identity: str) -> None:
         result = self._props.delete_one({"_id": identity})

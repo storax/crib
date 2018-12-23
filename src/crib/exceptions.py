@@ -44,3 +44,11 @@ class DuplicateProperty(Exception):
 
 class DuplicateUser(Exception):
     pass
+
+
+class InvalidQuery(Exception):
+    pass
+
+
+class UnknownOrder(InvalidQuery):
+    pass

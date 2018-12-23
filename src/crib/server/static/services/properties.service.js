@@ -1,37 +1,34 @@
-import { authHeader } from '../utils/index.js';
+import { req} from '../utils/index.js';
 import { userService } from './user.service.js';
 
 export const propertiesService = {
-  locations,
+  find,
 };
 
-function locations() {
-  const requestOptions = {
-    method: 'GET',
-    headers: {...authHeader(), ...{ 'Content-Type': 'application/json' }},
+function find() {
+  const config = {
+    method: 'post',
+    url: '/properties/find',
+    data: {
+      limit: 100,
+      order_by: [
+        ['price.amount', 1],
+        ['firstVisibleDate', -1]
+      ]
+    }
   };
-  return fetch('/properties/locations', requestOptions)
-    .then(handleResponse)
-    .then(locations=>{
-      return locations;
-    });
+  return req(config)
+    .then(response=>{
+      return response.data;
+    })
+    .catch(handle401);
 }
 
-function handleResponse(response) {
-  return response.text().then(text => {
-    const data = text && JSON.parse(text);
-    if (!response.ok) {
-      if (response.status === 401) {
-        // auto logout if 401 response returned from api
-        console.log("logout");
-        userService.logout();
-        location.reload(true);
-      }
-
-      const error = (data && data.message) || response.statusText;
-      return Promise.reject(error);
-    }
-
-    return data;
-  });
+function handle401(error) {
+  if (error.response && error.response.status === 401) {
+    console.log("logout");
+    userService.logout();
+    location.reload(true);
+  }
+  return Promise.reject(error);
 }
