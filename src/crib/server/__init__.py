@@ -4,6 +4,7 @@ Server for crib.
 import os
 
 import flask
+from flask_cors import CORS
 
 from . import auth, properties, spa
 
@@ -16,7 +17,7 @@ def create_app(config):
         JWT_BLACKLIST_ENABLED=True,
         JWT_BLACKLIST_TOKEN_CHECKS=["access", "refresh"],
     )
-
+    cors = CORS(app)
     app.config.from_mapping(config)
 
     # ensure the instance folder exists

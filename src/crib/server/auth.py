@@ -31,13 +31,7 @@ def check_if_token_in_blacklist(decrypted_token):
     return jti in blacklist
 
 
-@bp.route("/register", methods=("POST",))
-def register():
-    if not request.is_json:
-        return jsonify({"msg": "Missing JSON in request"}), 400
-
-    username = request.json.get("username", None)
-    password = request.json.get("password", None)
+def register(username, password):
     repo = current_app.user_repo
     error = None
 
@@ -47,16 +41,10 @@ def register():
         error = "Password is required."
 
     if error:
-        return jsonify({"msg": error}), 400
+        raise ValueError(error)
 
     user = User(username=username, password=generate_password_hash(password))
-    try:
-        repo.add_user(user)
-    except exceptions.DuplicateUser:
-        error = f"User {username} is already registered."
-        return jsonify({"msg": error}), 409
-
-    return jsonify({"username": username}), 201
+    repo.add_user(user)
 
 
 @bp.route("/login", methods=("POST",))

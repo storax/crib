@@ -15,7 +15,7 @@ from flask.cli import FlaskGroup, ScriptInfo
 from scrapy.cmdline import execute  # type: ignore
 
 from crib import app, exceptions
-from crib.server import create_app
+from crib.server import auth, create_app
 
 _log = logging.getLogger("crib")
 click_log.basic_config(_log)
@@ -103,3 +103,18 @@ def run(ctx):
     current_app.prop_repo = app.get_property_repository(cfg)
     current_app.user_repo = app.get_user_repository(cfg)
     current_app.run()
+
+
+@server.command()
+@click.argument("username")
+@click.password_option("--password")
+@click.pass_context
+def add_user(ctx: click.Context, username: str, password: str) -> None:
+    cfg = ctx.find_object(Context).config
+    current_app.user_repo = app.get_user_repository(cfg)
+    try:
+        auth.register(username, password)
+    except exceptions.DuplicateUser as err:
+        raise click.UsageError(f"User {username} already exists")
+    else:
+        click.echo(f"User {username} created")

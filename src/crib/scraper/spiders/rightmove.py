@@ -146,4 +146,8 @@ def _to_dt(string: str) -> datetime.datetime:
 
 
 def _to_price(data: Dict) -> Dict[str, Any]:
-    return {k: data[k] for k in ("amount", "currencyCode", "frequency")}
+    price = {k: data[k] for k in ("amount", "currencyCode", "frequency")}
+    if price["frequency"] == "weekly":
+        price["amount"] = int(price["amount"] * 52 / 12)
+        price["frequency"] = "monthly"
+    return price
