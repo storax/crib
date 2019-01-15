@@ -1,0 +1,8 @@
+include *.rst
+include *.toml
+include *.yaml
+include .bumpversion.cfg
+include .coveragerc
+include .isort.cfg
+include LICENSE
+recursive-include src/crib/resources *
