@@ -144,7 +144,9 @@ class MongoPropertyRepo(PropertyRepo):
             yield self._to_prop(data)
 
     def find(self, order_by=(), limit=1000) -> Iterable[Property]:
-        queried_props = self._props.find()
+        queried_props = self._props.find(
+            {"floorplanImages": {"$exists": True, "$ne": []}}
+        )
         if order_by:
             order_by = [(field, self._to_order(i)) for field, i in order_by]
             queried_props = queried_props.sort(order_by)
