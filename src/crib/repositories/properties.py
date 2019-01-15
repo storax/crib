@@ -36,6 +36,10 @@ class PropertyRepo(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    def update(self, prop: Property) -> None:
+        pass
+
+    @abc.abstractmethod
     def get(self, identity: str) -> Property:
         pass
 
@@ -64,6 +68,11 @@ class MemoryPropertyRepo(PropertyRepo):
     def insert(self, prop: Property) -> None:
         if prop["id"] in self._storage:
             raise exceptions.DuplicateProperty(prop)
+        self._storage[prop["id"]] = prop
+
+    def update(self, prop: Property) -> None:
+        if prop["id"] not in self._storage:
+            raise exceptions.EntityNotFound(prop["id"])
         self._storage[prop["id"]] = prop
 
     def exists(self, identity: str) -> bool:
@@ -130,6 +139,14 @@ class MongoPropertyRepo(PropertyRepo):
             self._props.insert_one(p)
         except pymongo.errors.DuplicateKeyError:
             raise exceptions.DuplicateProperty(p)
+
+    def update(self, prop: Property) -> None:
+        p = dict(prop)
+        p["_id"] = p["id"]
+        result = self._props.replace_one({"_id": p["_id"]}, p)
+        if result.matched_count == 0:
+            raise exceptions.EntityNotFound(p["id"])
+        assert result.matched_count == 1, "Duplicate IDs"
 
     def get(self, identity: str) -> Property:
         data = self._props.find_one({"_id": identity})
