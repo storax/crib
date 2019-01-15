@@ -6,7 +6,7 @@ import os
 import flask
 from flask_cors import CORS
 
-from . import auth, directions, properties, spa
+from . import auth, directions, properties
 
 
 def create_app(config):
@@ -17,7 +17,7 @@ def create_app(config):
         JWT_BLACKLIST_ENABLED=True,
         JWT_BLACKLIST_TOKEN_CHECKS=["access", "refresh"],
     )
-    cors = CORS(app)
+    CORS(app)
     app.config.from_mapping(config["server"])
 
     # ensure the instance folder exists
@@ -28,8 +28,6 @@ def create_app(config):
 
     app.register_blueprint(properties.bp)
     app.register_blueprint(directions.bp)
-    app.register_blueprint(spa.bp)
-    app.add_url_rule("/", endpoint="spa.index")
     auth.init_app(app)
 
     return app
