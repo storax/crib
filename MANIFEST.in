@@ -1,6 +1,5 @@
 include *.rst
 include *.toml
-include *.yaml
 include .bumpversion.cfg
 include .coveragerc
 include .isort.cfg
