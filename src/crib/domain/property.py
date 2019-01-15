@@ -10,7 +10,7 @@ from crib.exceptions import InvalidPropertyData
 
 
 class Property(Mapping):
-    schema: Dict[str, Dict[str, Union[str, Dict]]] = {
+    schema: Dict[str, Dict[str, Union[str, bool, Dict]]] = {
         "bedrooms": {"type": "integer", "required": True},
         "displayAddress": {"type": "string", "required": True},
         "featuredProperty": {"type": "boolean"},

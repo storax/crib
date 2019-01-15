@@ -3,8 +3,8 @@ Server for crib.
 """
 import os
 
-import flask
-from flask_cors import CORS
+import flask  # type: ignore
+from flask_cors import CORS  # type: ignore
 
 from . import auth, directions, properties
 

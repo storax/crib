@@ -10,8 +10,8 @@ from typing import IO, Any, Dict, List
 
 import click
 import click_log  # type: ignore
-from flask import Flask, current_app
-from flask.cli import FlaskGroup, ScriptInfo
+from flask import Flask, current_app  # type: ignore
+from flask.cli import FlaskGroup, ScriptInfo  # type: ignore
 from scrapy.cmdline import execute  # type: ignore
 
 from crib import app, exceptions
@@ -69,7 +69,6 @@ def browse(obj: Context) -> None:
     from pprint import pprint as pp
 
     repo = app.get_property_repository(obj.config)
-    props = repo._props
     _console = code.InteractiveConsole(locals())
     try:
         import rlcompleter

@@ -1,5 +1,7 @@
-from flask import Blueprint, current_app, jsonify, request
-from flask_jwt_extended import (
+from typing import Set
+
+from flask import Blueprint, current_app, jsonify, request  # type: ignore
+from flask_jwt_extended import (  # type: ignore
     JWTManager,
     create_access_token,
     create_refresh_token,
@@ -8,14 +10,17 @@ from flask_jwt_extended import (
     jwt_refresh_token_required,
     jwt_required,
 )
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import (  # type: ignore
+    check_password_hash,
+    generate_password_hash,
+)
 
 from crib import exceptions
 from crib.domain.user import User
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
-blacklist = set()
+blacklist: Set = set()
 
 jwt = JWTManager()
 

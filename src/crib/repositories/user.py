@@ -114,7 +114,7 @@ class MongoUserRepo(UserRepo):
             raise exceptions.DuplicateUser(u)
 
 
-UR = TypeVar("PR", bound=UserRepo)
+UR = TypeVar("UR", bound=UserRepo)
 TUR = Type[UR]
 
 

@@ -10,7 +10,7 @@ from crib.exceptions import InvalidUserData
 
 
 class User(Mapping):
-    schema: Dict[str, Dict[str, Union[str, Dict]]] = {
+    schema: Dict[str, Dict[str, Union[str, bool]]] = {
         "username": {"type": "string", "required": True},
         "password": {"type": "string", "required": True},
     }

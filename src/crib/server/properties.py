@@ -1,8 +1,8 @@
 """
 Property data
 """
-from flask import Blueprint, current_app, jsonify, request
-from flask_jwt_extended import jwt_required
+from flask import Blueprint, current_app, jsonify, request  # type: ignore
+from flask_jwt_extended import jwt_required  # type: ignore
 
 from crib import exceptions
 
