@@ -50,6 +50,7 @@ setup(
     ],
     keywords=[],
     install_requires=[
+        "chardet",
         "cerberus",
         "click",
         "click_log",

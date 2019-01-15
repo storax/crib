@@ -9,7 +9,7 @@ from crib import exceptions, plugins
 
 if TYPE_CHECKING:
     from crib.repositories.properties import PropertyRepo
-    from crib.repositories.users import UserRepo
+    from crib.repositories.user import UserRepo
 
 
 def get_property_repository(config: Dict) -> "PropertyRepo":
@@ -34,5 +34,7 @@ def get_user_repository(config: Dict) -> "UserRepo":
 
 def load_config(config: IO[str]) -> Dict:
     loaders = [l for loaders in plugins.hook.crib_add_config_loaders() for l in loaders]
-    cfg = _cfg.load(loaders, config)
+    default = _cfg.load_default(loaders)
+    user_cfg = _cfg.load(loaders, config)
+    cfg = _cfg.merge_config(default, user_cfg)
     return cfg

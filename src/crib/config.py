@@ -2,11 +2,13 @@
 Config loader
 """
 import abc
-import itertools
+import io
 import os
 from typing import IO, Any, Dict, List
 
+import chardet  # type: ignore
 import yaml
+from pkg_resources import Requirement, resource_string
 
 import crib
 from crib import exceptions
@@ -53,6 +55,34 @@ def load(loaders: List[AbstractConfigLoader], config: IO[str]) -> Dict[str, Any]
     supported = [ext for loader in loaders for ext in loader.extensions()]
     errors = {"Given": config.name, "Supported": supported}
     raise exceptions.ConfigError("Unknown config format extension.", errors)
+
+
+def _default_config() -> IO[str]:
+    req = Requirement.parse("crib")
+    content_bytes = resource_string(req, "crib/resources/config.yaml")
+    try:
+        contents = content_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        detected_info: Dict = chardet.detect(content_bytes)
+        contents = content_bytes.decode(detected_info["encoding"])
+
+    default_config = io.StringIO(contents)
+    default_config.name = "config.yaml"
+    return default_config
+
+
+def load_default(loaders: List[AbstractConfigLoader]) -> Dict:
+    default_config = _default_config()
+    cfg = load(loaders, default_config)
+    return cfg
+
+
+def merge_config(default: Dict, override: Dict) -> Dict:
+    config = {s: cfg.copy() for s, cfg in default.items()}
+    for override_section, configuration in override.items():
+        section = config.setdefault(override_section, {})
+        section.update(configuration)
+    return config
 
 
 @crib.hookimpl
