@@ -6,7 +6,6 @@ from urllib import parse as urlparse
 
 import scrapy  # type: ignore
 from scrapy.http.response import Response  # type: ignore
-from w3lib.html import remove_tags  # type: ignore
 
 from crib.domain.property import Property
 from crib.scraper import base
@@ -127,7 +126,9 @@ def to_prop(data):
         "summary",
         "transactionType",
     )
-    identity = lambda x: x
+
+    def identity(x):
+        return x
 
     conversions = {
         "firstVisibleDate": _to_dt,

@@ -9,8 +9,9 @@ from crib.services import directions
 bp = Blueprint("directions", __name__, url_prefix="/directions")
 
 
-@bp.route("/get", methods=("GET",))
-def get():
+@bp.route("/to_work", methods=("GET",))
+@jwt_required
+def to_work():
     args = request.args.copy()
     if "origin" not in args:
         return jsonify({"msg": "origin missing"}), 400

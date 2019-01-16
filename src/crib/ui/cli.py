@@ -10,7 +10,7 @@ from typing import IO, Any, Dict, List
 
 import click
 import click_log  # type: ignore
-from flask import Flask, current_app  # type: ignore
+from flask import current_app  # type: ignore
 from flask.cli import FlaskGroup, ScriptInfo  # type: ignore
 from scrapy.cmdline import execute  # type: ignore
 
@@ -66,12 +66,12 @@ def scrape(obj: Context, scrapy_args: List[str]) -> None:
 @click.pass_obj
 def browse(obj: Context) -> None:
     """Browse properties"""
-    from pprint import pprint as pp
+    from pprint import pprint as pp  # noqa: F401
 
     repo = app.get_property_repository(obj.config)
     _console = code.InteractiveConsole(locals())
     try:
-        import rlcompleter
+        import rlcompleter  # noqa: F401
         import readline
     except ImportError:
         pass
@@ -114,7 +114,7 @@ def add_user(ctx: click.Context, username: str, password: str) -> None:
     current_app.user_repo = app.get_user_repository(cfg)
     try:
         auth.register(username, password)
-    except exceptions.DuplicateUser as err:
+    except exceptions.DuplicateUser:
         raise click.UsageError(f"User {username} already exists")
     else:
         click.echo(f"User {username} created")
