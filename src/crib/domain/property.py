@@ -53,6 +53,7 @@ class Property(Mapping):
         "transactionType": {"type": "string", "required": True},
         "keyFeatures": {"type": "list", "schema": {"type": "string"}, "required": True},
         "lettingInformation": {"type": "dict", "required": True},
+        "toWork": {"type": "list", "default_setter": lambda doc: []},
     }
 
     def __init__(self, *args, **kwargs) -> None:

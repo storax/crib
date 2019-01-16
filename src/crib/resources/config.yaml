@@ -16,6 +16,7 @@ directions_service:
   work-location:
     latitude: 51.0
     longitude: 1.0
+  arrival-time: 1547458200
 
 scrape:
   # Scrapy settings for crib project

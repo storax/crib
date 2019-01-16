@@ -41,7 +41,8 @@ class DirectionsService(metaclass=abc.ABCMeta):
                     "latitude": {"type": "float", "required": True},
                     "longitude": {"type": "float", "required": True},
                 },
-            }
+            },
+            "arrival-time": {"type": "integer", "required": True},
         }
 
     @abc.abstractmethod
@@ -65,11 +66,19 @@ class GoogleDirections(DirectionsService):
             "key": key,
             "origin": ",".join((str(origin.latitude), str(origin.longitude))),
             "destination": ",".join((str(work.latitude), str(work.longitude))),
+            "arrival_time": self.config["arrival-time"],
             "mode": mode,
         }
         response = requests.get(self._URL, args)
         response.raise_for_status()
-        return response.json()
+
+        data = response.json()
+        if data["status"] != "OK":
+            raise exceptions.DirectionsError(
+                data.get("error_message", "Invalid request")
+            )
+
+        return data["routes"]
 
 
 DS = TypeVar("DS", bound=DirectionsService)
