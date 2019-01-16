@@ -101,6 +101,7 @@ def run(ctx):
     cfg = ctx.find_object(Context).config
     current_app.prop_repo = app.get_property_repository(cfg)
     current_app.user_repo = app.get_user_repository(cfg)
+    current_app.directions_service = app.get_direction_service(cfg)
     current_app.run()
 
 

@@ -2,7 +2,7 @@
 Crib application
 """
 import itertools
-from typing import IO, TYPE_CHECKING, Dict
+from typing import IO, TYPE_CHECKING, Callable, Dict
 
 from crib import config as _cfg
 from crib import exceptions, plugins
@@ -10,26 +10,33 @@ from crib import exceptions, plugins
 if TYPE_CHECKING:
     from crib.repositories.properties import PropertyRepo
     from crib.repositories.user import UserRepo
+    from crib.services.directions import DirectionsService
+
+
+def _load_plugin(config: Dict, config_section: str, hook: Callable):
+    plugin_config = config[config_section].copy()
+    plugin_type = plugin_config.pop("type")
+    loaded_plugins = hook()
+    for plugin in itertools.chain(*loaded_plugins):
+        if plugin.name() == plugin_type:
+            return plugin(plugin_config)
+    raise exceptions.PluginNotFound(f"{plugin_type} plugin not found")
 
 
 def get_property_repository(config: Dict) -> "PropertyRepo":
-    repo_config = config["property_repository"].copy()
-    repo_type = repo_config.pop("type")
-    repo_plugins = plugins.hook.crib_add_property_repos()
-    for repo in itertools.chain(*repo_plugins):
-        if repo.name() == repo_type:
-            return repo(repo_config)
-    raise exceptions.PluginNotFound(f"Repository {repo_type} plugin not found")
+    return _load_plugin(
+        config, "property_repository", plugins.hook.crib_add_property_repos
+    )
 
 
 def get_user_repository(config: Dict) -> "UserRepo":
-    repo_config = config["user_repository"].copy()
-    repo_type = repo_config.pop("type")
-    repo_plugins = plugins.hook.crib_add_user_repos()
-    for repo in itertools.chain(*repo_plugins):
-        if repo.name() == repo_type:
-            return repo(repo_config)
-    raise exceptions.PluginNotFound(f"Repository {repo_type} plugin not found")
+    return _load_plugin(config, "user_repository", plugins.hook.crib_add_user_repos)
+
+
+def get_direction_service(config: Dict) -> "DirectionsService":
+    return _load_plugin(
+        config, "directions_service", plugins.hook.crib_add_directions_services
+    )
 
 
 def load_config(config: IO[str]) -> Dict:

@@ -18,7 +18,7 @@ def create_app(config):
         JWT_BLACKLIST_TOKEN_CHECKS=["access", "refresh"],
     )
     CORS(app)
-    app.config.from_mapping(config["server"])
+    app.config.from_mapping(config.get("server", {}))
 
     # ensure the instance folder exists
     try:

@@ -4,6 +4,7 @@ import pluggy  # type: ignore
 
 from crib import config
 from crib.repositories import properties, user
+from crib.services import directions
 
 hookspec = pluggy.HookspecMarker("crib")
 
@@ -12,6 +13,8 @@ PR = TypeVar("PR", bound=properties.PropertyRepo)
 TPR = Type[PR]
 UR = TypeVar("UR", bound=user.UserRepo)
 TUR = Type[UR]
+DS = TypeVar("DS", bound=directions.DirectionsService)
+TDS = Type[DS]
 
 
 class CribSpec:
@@ -35,7 +38,15 @@ class CribSpec:
     def crib_add_config_loaders(self) -> List[config.AbstractConfigLoader]:
         """Add config loaders
 
-        :return: a list or AbstractConfigLoader
+        :return: a list of AbstractConfigLoader
+        """
+        return []
+
+    @hookspec
+    def crib_add_directions_services(self) -> List[TDS]:
+        """Add DirectionsServices
+
+        :return: a list of DirectionsService
         """
         return []
 
@@ -47,6 +58,7 @@ def _init_plugin_manager() -> pluggy.PluginManager:
     pm.register(config)
     pm.register(properties)
     pm.register(user)
+    pm.register(directions)
     return pm
 
 

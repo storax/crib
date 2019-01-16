@@ -3,11 +3,19 @@ property_repository:
   connection:
     host: 'localhost:27017'
   database: "crib"
+
 user_repository:
   type: MongoUserRepo
   connection:
     host: 'localhost:27017'
   database: "crib"
+
+directions_service:
+  type: GoogleDirections
+  api-key: CHANGEME
+  work-location:
+    latitude: 51.0
+    longitude: 1.0
 
 scrape:
   # Scrapy settings for crib project
@@ -96,6 +104,3 @@ scrape:
 
   RIGHTMOVE_SEARCHES: []
     # - "https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=USERDEFINEDAREA%5E%7B%22id%22%3A4848180%7D&minBedrooms=1&maxPrice=1500&minPrice=1000&dontShow=houseShare%2Cretirement&letType=longTerm"
-
-server:
-  GOOGLE_MAPS_APIKEY: NOTSET
