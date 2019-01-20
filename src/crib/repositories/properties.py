@@ -4,12 +4,13 @@ Simple crud repository base class
 import abc
 from typing import Any, Dict, Iterable, Type, TypeVar
 
-import cerberus  # type: ignore
 import pymongo  # type: ignore
 
 import crib
 from crib import exceptions, plugins
 from crib.domain.property import Property
+
+from . import mongo
 
 
 class PropertyRepo(plugins.Plugin):
@@ -80,32 +81,10 @@ class MemoryPropertyRepo(PropertyRepo):
         return len(self._storage)
 
 
-class MongoPropertyRepo(PropertyRepo):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self._client = pymongo.MongoClient(**self.config["connection"])
-        self._db = self._client[self.config["database"]]
-
-    @classmethod
-    def config_schema(cls) -> Dict[str, Any]:
-        return {
-            "connection": {
-                "type": "dict",
-                "required": True,
-                "schema": {
-                    "host": {"type": "string", "required": True},
-                    "username": {"type": "string"},
-                    "password": {"type": "string"},
-                    "authSource": {"type": "string"},
-                    "authMechanism": {"type": "string"},
-                },
-            },
-            "database": {"type": "string", "required": True},
-        }
-
+class MongoPropertyRepo(PropertyRepo, mongo.MongoRepo):
     @property
     def _props(self):
-        return self._db.properties
+        return self.db.properties
 
     def _to_prop(self, data: Dict[str, Any]) -> Property:
         data.pop("_id")

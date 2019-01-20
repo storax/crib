@@ -63,6 +63,8 @@ class GoogleDirections(DirectionsService):
             raise exceptions.DirectionsError(
                 data.get("error_message", "Invalid request")
             )
+        route = data["routes"][0]["legs"][0]
+        route["overview_polyline"] = data["routes"][0]["overview_polyline"]
 
         return data["routes"]
 

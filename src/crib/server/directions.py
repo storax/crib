@@ -30,10 +30,10 @@ def to_work():
 
     origin = directions.Location(**prop["location"])
 
-    routes = current_app.directions_service.to_work(origin, args["mode"])
+    route = current_app.directions_service.to_work(origin, args["mode"])
 
     prop_d = dict(prop)
-    prop_d["toWork"] = routes
+    prop_d["toWork"] = route
     current_app.prop_repo.update(Property(prop_d))
 
-    return jsonify(routes)
+    return jsonify(route)

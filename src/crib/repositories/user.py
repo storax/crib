@@ -11,6 +11,8 @@ import crib
 from crib import exceptions, plugins
 from crib.domain.user import User
 
+from . import mongo
+
 
 class UserRepo(plugins.Plugin):
     @abc.abstractmethod
@@ -46,32 +48,10 @@ class MemoryPropertyRepo(UserRepo):
         return username in self._storage
 
 
-class MongoUserRepo(UserRepo):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self._client = pymongo.MongoClient(**self.config["connection"])
-        self._db = self._client[self.config["database"]]
-
-    @classmethod
-    def config_schema(cls) -> Dict[str, Any]:
-        return {
-            "connection": {
-                "type": "dict",
-                "required": True,
-                "schema": {
-                    "host": {"type": "string", "required": True},
-                    "username": {"type": "string"},
-                    "password": {"type": "string"},
-                    "authSource": {"type": "string"},
-                    "authMechanism": {"type": "string"},
-                },
-            },
-            "database": {"type": "string", "required": True},
-        }
-
+class MongoUserRepo(UserRepo, mongo.MongoRepo):
     @property
     def _users(self):
-        return self._db.users
+        return self.db.users
 
     def _to_user(self, data: Dict[str, Any]) -> User:
         data.pop("_id")
