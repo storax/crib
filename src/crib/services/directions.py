@@ -8,7 +8,7 @@ import cerberus  # type: ignore
 import requests
 
 import crib
-from crib import exceptions
+from crib import exceptions, plugins
 
 
 class Location(NamedTuple):
@@ -16,21 +16,7 @@ class Location(NamedTuple):
     longitude: float
 
 
-class DirectionsService(metaclass=abc.ABCMeta):
-    def __init__(self, config: Dict) -> None:
-        super().__init__()
-        schema = self.config_schema()
-        validator = cerberus.Validator(schema)
-        if not validator.validate(config):
-            raise exceptions.ConfigError(
-                f"Invalid config for {self.name()}", validator.errors
-            )
-        self.config = validator.document
-
-    @classmethod
-    def name(cls) -> str:
-        return cls.__name__
-
+class DirectionsService(plugins.Plugin):
     @classmethod
     def config_schema(cls) -> Dict[str, Any]:
         return {
