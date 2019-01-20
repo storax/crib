@@ -10,6 +10,7 @@ from crib import exceptions, plugin_loader
 if TYPE_CHECKING:
     from crib.repositories.properties import PropertyRepo
     from crib.repositories.user import UserRepo
+    from crib.repositories.directions import DirectionsRepo
     from crib.services.directions import DirectionsService
 
 
@@ -32,6 +33,12 @@ def get_property_repository(config: Dict) -> "PropertyRepo":
 def get_user_repository(config: Dict) -> "UserRepo":
     return _load_plugin(
         config, "user_repository", plugin_loader.hook.crib_add_user_repos
+    )
+
+
+def get_directions_repository(config: Dict) -> "DirectionsRepo":
+    return _load_plugin(
+        config, "directions_repository", plugin_loader.hook.crib_add_directions_repos
     )
 
 

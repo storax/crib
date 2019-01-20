@@ -18,11 +18,7 @@ class ValidationError(Exception):
         return f"{self.msg}:\n{errors}"
 
 
-class InvalidPropertyData(ValidationError):
-    pass
-
-
-class InvalidUserData(ValidationError):
+class InvalidData(ValidationError):
     pass
 
 

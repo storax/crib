@@ -3,6 +3,7 @@ from typing import List, Type, TypeVar
 import pluggy  # type: ignore
 
 from crib import config
+from crib.repositories import directions as dirrepo
 from crib.repositories import properties, user
 from crib.services import directions
 
@@ -13,6 +14,8 @@ PR = TypeVar("PR", bound=properties.PropertyRepo)
 TPR = Type[PR]
 UR = TypeVar("UR", bound=user.UserRepo)
 TUR = Type[UR]
+DR = TypeVar("DR", bound=direpo.DirectionsRepo)
+TDR = Type[DR]
 DS = TypeVar("DS", bound=directions.DirectionsService)
 TDS = Type[DS]
 
@@ -20,7 +23,7 @@ TDS = Type[DS]
 class CribSpec:
     @hookspec
     def crib_add_property_repos(self) -> List[TPR]:
-        """Add scraper plugins
+        """Add property repo plugins
 
         :return: a list of PropertyRepos
         """
@@ -28,9 +31,17 @@ class CribSpec:
 
     @hookspec
     def crib_add_user_repos(self) -> List[TUR]:
-        """Add scraper plugins
+        """Add user repo plugins
 
         :return: a list of UserRepos
+        """
+        return []
+
+    @hookspec
+    def crib_add_directions_repos(self) -> List[TDR]:
+        """Add directions repo plugins
+
+        :return: a list of DirectionsRepos
         """
         return []
 
@@ -59,6 +70,7 @@ def _init_plugin_manager() -> pluggy.PluginManager:
     pm.register(properties)
     pm.register(user)
     pm.register(directions)
+    pm.register(dirrepo)
     return pm
 
 

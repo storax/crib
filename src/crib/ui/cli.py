@@ -80,6 +80,33 @@ def browse(obj: Context) -> None:
     _console.interact(banner="You can access the repository via the 'repo' variable.")
 
 
+@main.command()
+@click.pass_obj
+def migrate(obj: Context) -> None:
+    """Browse properties"""
+    from pprint import pprint as pp  # noqa: F401
+    from crib.domain.property import Property
+
+    repo = app.get_property_repository(obj.config)
+    for oldp in repo._props.find():
+        i = oldp["id"]
+        if "toWork" not in oldp:
+            click.echo(f"ignoring: {i}")
+            continue
+        click.echo(f"migrating: {i}")
+        toWork = oldp["toWork"]
+        try:
+            route = toWork[0]["legs"][0]
+        except KeyError:
+            continue
+        route["overview_polyline"] = toWork[0]["overview_polyline"]
+        oldp["toWork"] = route
+        result = repo._props.replace_one({"_id": oldp["_id"]}, oldp)
+        if result.matched_count == 0:
+            click.echo(f"Error {i}")
+        assert result.matched_count == 1, "duplicate id"
+
+
 def create_app_wrapper(*args, **kwargs):
     ctx = click.get_current_context()
     cfg = ctx.find_object(Context).config
@@ -101,6 +128,7 @@ def run(ctx):
     cfg = ctx.find_object(Context).config
     current_app.prop_repo = app.get_property_repository(cfg)
     current_app.user_repo = app.get_user_repository(cfg)
+    current_app.directions_repo = app.get_directions_repository(cfg)
     current_app.directions_service = app.get_direction_service(cfg)
     current_app.run()
 

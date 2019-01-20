@@ -2,7 +2,7 @@
 Directions service
 """
 import abc
-from typing import Any, Dict, Iterable, NamedTuple, Type, TypeVar
+from typing import Any, Dict, Iterable, List, NamedTuple, Type, TypeVar
 
 import cerberus  # type: ignore
 import requests
@@ -29,11 +29,37 @@ class DirectionsService(plugins.Plugin):
                 },
             },
             "arrival-time": {"type": "integer", "required": True},
+            "search-area": {
+                "type": "dict",
+                "required": True,
+                "schema": {
+                    "northEast": {
+                        "type": "dict",
+                        "required": True,
+                        "schema": {
+                            "lat": {"type": "float", "required": True},
+                            "lng": {"type": "float", "required": True},
+                        },
+                    },
+                    "southWest": {
+                        "type": "dict",
+                        "required": True,
+                        "schema": {
+                            "lat": {"type": "float", "required": True},
+                            "lng": {"type": "float", "required": True},
+                        },
+                    },
+                },
+            },
         }
 
     @abc.abstractmethod
     def to_work(self, origin: Location, mode: str) -> Dict:
         return {}
+
+    @abc.abstractmethod
+    def map_to_work(self, mode: str) -> List[Dict]:
+        return []
 
 
 class GoogleDirections(DirectionsService):
@@ -66,7 +92,10 @@ class GoogleDirections(DirectionsService):
         route = data["routes"][0]["legs"][0]
         route["overview_polyline"] = data["routes"][0]["overview_polyline"]
 
-        return data["routes"]
+        return route
+
+    def map_to_work(self, mode: str) -> List[Dict]:
+        return []
 
 
 DS = TypeVar("DS", bound=DirectionsService)

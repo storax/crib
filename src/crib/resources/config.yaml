@@ -10,6 +10,12 @@ user_repository:
     host: 'localhost:27017'
   database: "crib"
 
+directions_repository:
+  type: MongoDirectionsRepo
+  connection:
+    host: 'localhost:27017'
+  database: "crib"
+
 directions_service:
   type: GoogleDirections
   api-key: CHANGEME
@@ -17,6 +23,13 @@ directions_service:
     latitude: 51.0
     longitude: 1.0
   arrival-time: 1547458200
+  search-area:
+    northEast:
+      lat: 51.1
+      lng: 0.03
+    southWest:
+      lat: 51.0
+      lng: -0.03
 
 scrape:
   # Scrapy settings for crib project
