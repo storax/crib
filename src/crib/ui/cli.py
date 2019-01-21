@@ -15,7 +15,7 @@ from flask.cli import FlaskGroup, ScriptInfo  # type: ignore
 from scrapy.cmdline import execute  # type: ignore
 
 from crib import app, exceptions
-from crib.server import auth, create_app
+from crib.server import auth, create_app, directions
 
 _log = logging.getLogger("crib")
 click_log.basic_config(_log)
@@ -146,3 +146,21 @@ def add_user(ctx: click.Context, username: str, password: str) -> None:
         raise click.UsageError(f"User {username} already exists")
     else:
         click.echo(f"User {username} created")
+
+
+@server.command()
+@click.argument("mode", type=click.Choice(["transit"]))
+@click.pass_context
+def fetch_to_work(ctx: click.Context, mode) -> None:
+    cfg = ctx.find_object(Context).config
+    current_app.directions_repo = app.get_directions_repository(cfg)
+    current_app.directions_service = app.get_direction_service(cfg)
+    directions.fetch_map_to_work(mode)
+
+
+# @server.command()
+# @click.pass_context
+# def clear_directions(ctx: click.Context) -> None:
+#     cfg = ctx.find_object(Context).config
+#     directions_repo = app.get_directions_repository(cfg)
+#     directions_repo._directions.delete_many({})

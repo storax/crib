@@ -14,7 +14,7 @@ PR = TypeVar("PR", bound=properties.PropertyRepo)
 TPR = Type[PR]
 UR = TypeVar("UR", bound=user.UserRepo)
 TUR = Type[UR]
-DR = TypeVar("DR", bound=direpo.DirectionsRepo)
+DR = TypeVar("DR", bound=dirrepo.DirectionsRepo)
 TDR = Type[DR]
 DS = TypeVar("DS", bound=directions.DirectionsService)
 TDS = Type[DS]

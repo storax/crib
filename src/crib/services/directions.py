@@ -2,6 +2,7 @@
 Directions service
 """
 import abc
+import logging
 from typing import Any, Dict, Iterable, List, NamedTuple, Type, TypeVar
 
 import cerberus  # type: ignore
@@ -9,6 +10,8 @@ import requests
 
 import crib
 from crib import exceptions, plugins
+
+log = logging.getLogger(__name__)
 
 
 class Location(NamedTuple):
@@ -57,9 +60,19 @@ class DirectionsService(plugins.Plugin):
     def to_work(self, origin: Location, mode: str) -> Dict:
         return {}
 
-    @abc.abstractmethod
-    def map_to_work(self, mode: str) -> List[Dict]:
-        return []
+    def fetch_map_to_work(self, mode: str) -> Iterable[Dict]:
+        for i, ll in list(enumerate(self.raster_map()))[4559:]:
+            log.info("Fetching #%s", i)
+            yield self.to_work(Location(**ll), mode)
+
+    def raster_map(self) -> Iterable[Dict]:
+        ne = self.config["search-area"]["northEast"]
+        sw = self.config["search-area"]["southWest"]
+        latdelta = ne["lat"] - sw["lat"]
+        lngdelta = ne["lng"] - sw["lng"]
+        for lat in frange(sw["lat"], ne["lat"], latdelta / 100):
+            for lng in frange(sw["lng"], ne["lng"], lngdelta / 100):
+                yield {"latitude": lat, "longitude": lng}
 
 
 class GoogleDirections(DirectionsService):
@@ -72,6 +85,7 @@ class GoogleDirections(DirectionsService):
         return schema
 
     def to_work(self, origin: Location, mode: str) -> Dict:
+        log.info("Fetching route to work: %s, %s", origin.latitude, origin.longitude)
         key = self.config["api-key"]
         work = Location(**self.config["work-location"])
         args = {
@@ -86,16 +100,17 @@ class GoogleDirections(DirectionsService):
 
         data = response.json()
         if data["status"] != "OK":
-            raise exceptions.DirectionsError(
-                data.get("error_message", "Invalid request")
-            )
+            if data["status"] == "ZERO_RESULTS":
+                return {}
+            import pdb
+
+            pdb.set_trace()
+            msg = data.get("error_message", "Invalid request")
+            raise exceptions.DirectionsError(msg)
         route = data["routes"][0]["legs"][0]
         route["overview_polyline"] = data["routes"][0]["overview_polyline"]
 
         return route
-
-    def map_to_work(self, mode: str) -> List[Dict]:
-        return []
 
 
 DS = TypeVar("DS", bound=DirectionsService)
@@ -105,3 +120,19 @@ TDS = Type[DS]
 @crib.hookimpl
 def crib_add_directions_services() -> Iterable[TDS]:
     return [GoogleDirections]
+
+
+def frange(x, y, jump=1.0):
+    """Range for floats
+
+    Credit: https://gist.github.com/axelpale/3e780ebdde4d99cbb69ffe8b1eada92c
+    """
+    i = 0.0
+    x = float(x)  # Prevent yielding integers.
+    x0 = x
+    epsilon = jump / 2.0
+    yield x  # yield always first value
+    while x + epsilon < y:
+        i += 1.0
+        x = x0 + i * jump
+        yield x
