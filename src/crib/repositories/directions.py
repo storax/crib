@@ -69,11 +69,9 @@ class MongoDirectionsRepo(DirectionsRepo, mongo.MongoRepo):
     def get_to_work_durations(self) -> Iterable[Dict]:
         for d in self._directions.find():
             yield {
-                "location": {
-                    "latitude": d["start_location"]["lat"],
-                    "longitude": d["start_location"]["lng"],
-                },
-                "duration": d["duration"]["value"],
+                "location": [d["start_location"]["lat"], d["start_location"]["lng"]],
+                "durationValue": d["duration"]["value"],
+                "duration": d["duration"]["text"],
             }
 
 

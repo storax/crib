@@ -3,8 +3,11 @@ Property data
 """
 import logging
 
+import cmocean
+import numpy
 from flask import Blueprint, current_app, jsonify, request  # type: ignore
 from flask_jwt_extended import jwt_required  # type: ignore
+from matplotlib.colors import rgb2hex
 
 from crib import exceptions
 from crib.domain.direction import Direction
@@ -53,11 +56,34 @@ def raster_map():
 @bp.route("/to_work_durations", methods=("GET",))
 @jwt_required
 def to_work_durations():
+    args = request.args.copy()
+    try:
+        cmname = args.get("colormap", "thermal_r")
+        colormap = cmocean.cm.cmap_d[cmname]
+    except KeyError:
+        return jsonify({"msg": "Invalid color map"}), 400
+
     durations = list(current_app.directions_repo.get_to_work_durations())
-    maxD = max(durations, key=lambda d: d["duration"])["duration"]
-    minD = min(durations, key=lambda d: d["duration"])["duration"]
-    log.info("Fetched %s durations", len(durations))
-    return jsonify({"durations": durations, "minDuration": minD, "maxDuration": maxD})
+    sortkey = lambda d: d["durationValue"]
+    maxD = max(durations, key=sortkey)["durationValue"]
+    minD = min(durations, key=sortkey)["durationValue"]
+
+    colors = color_values(minD, maxD, colormap)
+
+    offset = minD + 1
+    for d in durations:
+        v = d.pop("durationValue")
+        d["color"] = colors[v - offset]
+    log.debug("Fetched %s durations", len(durations))
+    return jsonify(durations)
+
+
+def color_values(minV, maxV, colormap):
+    delta = maxV - minV
+    colormap = colormap._resample(delta)
+    rgb_values = colormap(numpy.arange(delta))[:, :-1]
+    hex_values = [rgb2hex(rgb) for rgb in rgb_values]
+    return hex_values
 
 
 def fetch_map_to_work(mode):

@@ -61,7 +61,7 @@ class DirectionsService(plugins.Plugin):
         return {}
 
     def fetch_map_to_work(self, mode: str) -> Iterable[Dict]:
-        for i, ll in list(enumerate(self.raster_map()))[4559:]:
+        for i, ll in list(enumerate(self.raster_map())):
             log.info("Fetching #%s", i)
             yield self.to_work(Location(**ll), mode)
 
@@ -102,11 +102,7 @@ class GoogleDirections(DirectionsService):
         if data["status"] != "OK":
             if data["status"] == "ZERO_RESULTS":
                 return {}
-            import pdb
-
-            pdb.set_trace()
-            msg = data.get("error_message", "Invalid request")
-            raise exceptions.DirectionsError(msg)
+            raise exceptions.DirectionsError(status)
         route = data["routes"][0]["legs"][0]
         route["overview_polyline"] = data["routes"][0]["overview_polyline"]
 

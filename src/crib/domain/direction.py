@@ -11,7 +11,7 @@ _polyline = vdict({"points": vstr()})
 _distance = _duration = vdict({"value": vint(), "text": vstr()})
 _latlng = vdict({"lat": vfloat(), "lng": vfloat()})
 _location = vdict({"latitude": vfloat(), "longitude": vfloat()})
-_time = vdict({"text": vstr(), "time_zone": vstr(), "value": vint()})
+_time = vdict({"text": vstr(), "time_zone": vstr(), "value": vint()}, False)
 
 
 class Direction(Model):
@@ -61,9 +61,9 @@ class Direction(Model):
                                     ),
                                     "url": vstr(0),
                                     "name": vstr(0),
-                                    "text_color": vstr(),
-                                    "short_name": vstr(),
-                                    "color": vstr(),
+                                    "text_color": vstr(0),
+                                    "short_name": vstr(0),
+                                    "color": vstr(0),
                                     "agencies": vlist({"type": "dict"}),
                                 }
                             ),
