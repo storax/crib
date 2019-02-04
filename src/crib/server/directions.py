@@ -53,6 +53,13 @@ def raster_map():
     return jsonify(raster)
 
 
+@bp.route("/colormaps", methods=("GET",))
+@jwt_required
+def colormaps():
+    maps = list(cmocean.cm.cmap_d.keys())
+    return jsonify(maps)
+
+
 @bp.route("/to_work_durations", methods=("GET",))
 @jwt_required
 def to_work_durations():
