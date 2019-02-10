@@ -3,12 +3,14 @@ Mixin class for MongoDB repositories
 """
 from typing import Any, Dict
 
-import pymongo
+import pymongo  # type: ignore
 
-from crib import exceptions, plugins
+from crib import injection, plugins
 
 
 class MongoRepo(plugins.Plugin):
+    config = injection.Infrastructure()
+
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._client = pymongo.MongoClient(**self.config["connection"])

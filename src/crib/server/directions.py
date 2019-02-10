@@ -3,11 +3,11 @@ Property data
 """
 import logging
 
-import cmocean
-import numpy
+import cmocean  # type: ignore
+import numpy  # type: ignore
 from flask import Blueprint, current_app, jsonify, request  # type: ignore
 from flask_jwt_extended import jwt_required  # type: ignore
-from matplotlib.colors import rgb2hex
+from matplotlib.colors import rgb2hex  # type: ignore
 
 from crib import exceptions
 from crib.domain.direction import Direction
@@ -28,7 +28,7 @@ def to_work():
         return jsonify({"msg": "mode missing"}), 400
 
     try:
-        prop = current_app.prop_repo.get(args["prop_id"])
+        prop = current_app.property_repository.get(args["prop_id"])
     except exceptions.EntityNotFound as err:
         return jsonify({"msg": str(err)}), 400
 
@@ -41,7 +41,7 @@ def to_work():
 
     prop_d = dict(prop)
     prop_d["toWork"] = route
-    current_app.prop_repo.update(Property(prop_d))
+    current_app.property_repository.update(Property(prop_d))
 
     return jsonify(route)
 
@@ -70,7 +70,7 @@ def to_work_durations():
     except KeyError:
         return jsonify({"msg": "Invalid color map"}), 400
 
-    durations = list(current_app.directions_repo.get_to_work_durations())
+    durations = list(current_app.directions_repository.get_to_work_durations())
     sortkey = lambda d: d["durationValue"]
     maxD = max(durations, key=sortkey)["durationValue"]
     minD = min(durations, key=sortkey)["durationValue"]
@@ -100,4 +100,4 @@ def fetch_map_to_work(mode):
         except Exception as err:
             print(err)
             continue
-        current_app.directions_repo.insert(d)
+        current_app.directions_repository.insert(d)

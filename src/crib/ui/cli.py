@@ -6,7 +6,7 @@ import logging
 import os
 import sys
 import types
-from typing import IO, Any, Dict, List
+from typing import IO, List
 
 import click
 import click_log  # type: ignore
@@ -14,16 +14,11 @@ from flask import current_app  # type: ignore
 from flask.cli import FlaskGroup, ScriptInfo  # type: ignore
 from scrapy.cmdline import execute  # type: ignore
 
-from crib import app, exceptions
+from crib import app, exceptions, injection
 from crib.server import auth, create_app, directions
 
 _log = logging.getLogger("crib")
 click_log.basic_config(_log)
-
-
-class Context:
-    config: Dict[str, Any]
-    script_info: ScriptInfo
 
 
 @click.group()
@@ -32,19 +27,17 @@ class Context:
 @click.pass_context
 def main(ctx: click.Context, config: IO[str]) -> None:
     """Find the best properties with crib!"""
-    try:
-        cfg = app.load_config(config)
-    except exceptions.ConfigError as err:
-        raise click.UsageError(str(err))
 
-    ctx.obj = Context()
-    ctx.obj.config = cfg
+    class Container(app.App):
+        config_file = injection.ObjectProvider(config)
+
+    ctx.obj = Container()
 
 
 @main.command(context_settings=dict(ignore_unknown_options=True), add_help_option=False)
 @click.argument("scrapy_args", nargs=-1, type=click.UNPROCESSED)
 @click.pass_obj
-def scrape(obj: Context, scrapy_args: List[str]) -> None:
+def scrape(obj, scrapy_args: List[str]) -> None:
     """Scrape property websites and store them in a repository.
 
     Forwards all arguments to scrapy.
@@ -52,10 +45,9 @@ def scrape(obj: Context, scrapy_args: List[str]) -> None:
     argv = ["scrapy"]
     argv.extend(scrapy_args)
     settings_module = types.ModuleType("_crib_scrapy_settings_")
-    cfg = obj.config.copy()
-    scrape_cfg = cfg.pop("scrape", {})
+    scrape_cfg = obj.config["scrape"]
     settings_module.__dict__.update(scrape_cfg)
-    settings_module.CRIB = cfg  # type: ignore
+    settings_module.CONTAINER = obj  # type: ignore
     sys.modules[settings_module.__name__] = settings_module
     os.environ["SCRAPY_SETTINGS_MODULE"] = settings_module.__name__
 
@@ -64,11 +56,11 @@ def scrape(obj: Context, scrapy_args: List[str]) -> None:
 
 @main.command()
 @click.pass_obj
-def browse(obj: Context) -> None:
+def browse(obj) -> None:
     """Browse properties"""
     from pprint import pprint as pp  # noqa: F401
 
-    repo = app.get_property_repository(obj.config)
+    repo = obj.property_repository
     _console = code.InteractiveConsole(locals())
     try:
         import rlcompleter  # noqa: F401
@@ -80,37 +72,10 @@ def browse(obj: Context) -> None:
     _console.interact(banner="You can access the repository via the 'repo' variable.")
 
 
-@main.command()
-@click.pass_obj
-def migrate(obj: Context) -> None:
-    """Browse properties"""
-    from pprint import pprint as pp  # noqa: F401
-    from crib.domain.property import Property
-
-    repo = app.get_property_repository(obj.config)
-    for oldp in repo._props.find():
-        i = oldp["id"]
-        if "toWork" not in oldp:
-            click.echo(f"ignoring: {i}")
-            continue
-        click.echo(f"migrating: {i}")
-        toWork = oldp["toWork"]
-        try:
-            route = toWork[0]["legs"][0]
-        except KeyError:
-            continue
-        route["overview_polyline"] = toWork[0]["overview_polyline"]
-        oldp["toWork"] = route
-        result = repo._props.replace_one({"_id": oldp["_id"]}, oldp)
-        if result.matched_count == 0:
-            click.echo(f"Error {i}")
-        assert result.matched_count == 1, "duplicate id"
-
-
 def create_app_wrapper(*args, **kwargs):
     ctx = click.get_current_context()
-    cfg = ctx.find_object(Context).config
-    return create_app(cfg)
+    container = ctx.obj
+    return create_app(container)
 
 
 @main.group(
@@ -125,11 +90,6 @@ def server():
 @server.command()
 @click.pass_context
 def run(ctx):
-    cfg = ctx.find_object(Context).config
-    current_app.prop_repo = app.get_property_repository(cfg)
-    current_app.user_repo = app.get_user_repository(cfg)
-    current_app.directions_repo = app.get_directions_repository(cfg)
-    current_app.directions_service = app.get_direction_service(cfg)
     current_app.run()
 
 
@@ -138,8 +98,6 @@ def run(ctx):
 @click.password_option("--password")
 @click.pass_context
 def add_user(ctx: click.Context, username: str, password: str) -> None:
-    cfg = ctx.find_object(Context).config
-    current_app.user_repo = app.get_user_repository(cfg)
     try:
         auth.register(username, password)
     except exceptions.DuplicateUser:
@@ -152,15 +110,4 @@ def add_user(ctx: click.Context, username: str, password: str) -> None:
 @click.argument("mode", type=click.Choice(["transit"]))
 @click.pass_context
 def fetch_to_work(ctx: click.Context, mode) -> None:
-    cfg = ctx.find_object(Context).config
-    current_app.directions_repo = app.get_directions_repository(cfg)
-    current_app.directions_service = app.get_direction_service(cfg)
     directions.fetch_map_to_work(mode)
-
-
-# @server.command()
-# @click.pass_context
-# def clear_directions(ctx: click.Context) -> None:
-#     cfg = ctx.find_object(Context).config
-#     directions_repo = app.get_directions_repository(cfg)
-#     directions_repo._directions.delete_many({})

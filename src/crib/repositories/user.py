@@ -4,7 +4,6 @@ Simple user repository
 import abc
 from typing import Any, Dict, Iterable, Type, TypeVar
 
-import cerberus  # type: ignore
 import pymongo  # type: ignore
 
 import crib

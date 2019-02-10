@@ -1,10 +1,7 @@
 """
 Direction model
 """
-
-from typing import Dict, Union
-
-from crib.domain.model import Model
+from crib.domain.model import Model, SchemaType
 from crib.validation import vdict, vfloat, vint, vlist, vstr
 
 _polyline = vdict({"points": vstr()})
@@ -15,7 +12,7 @@ _time = vdict({"text": vstr(), "time_zone": vstr(), "value": vint()}, False)
 
 
 class Direction(Model):
-    schema: Dict[str, Dict[str, Union[str, bool, Dict]]] = {
+    schema: SchemaType = {
         "overview_polyline": _polyline,
         "duration": _duration,
         "distance": _distance,

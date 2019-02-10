@@ -7,6 +7,7 @@ from urllib import parse as urlparse
 import scrapy  # type: ignore
 from scrapy.http.response import Response  # type: ignore
 
+from crib import injection
 from crib.domain.property import Property
 from crib.scraper import base
 from crib.scraper.items import PropertyItem
@@ -14,8 +15,9 @@ from crib.scraper.items import PropertyItem
 PR = Iterable[Union[Dict, scrapy.Request]]
 
 
-class RightmoveSpider(base.WithRepo, scrapy.Spider):
+class RightmoveSpider(base.WithInjection, scrapy.Spider):
     name: str = "rightmove"
+    property_repository = injection.Dependency()
 
     def start_requests(self) -> Iterable[scrapy.Request]:
         urls = self.settings.getlist("RIGHTMOVE_SEARCHES") or []
@@ -37,7 +39,7 @@ class RightmoveSpider(base.WithRepo, scrapy.Spider):
         properties = model["properties"]
         for data in properties:
             _make_id(data)
-            if self.repo.exists(data["id"]):
+            if self.property_repository.exists(data["id"]):
                 continue
             callback = functools.partial(self.parse_property, data)
             yield response.follow(data["propertyUrl"], callback=callback)

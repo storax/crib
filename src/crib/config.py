@@ -11,7 +11,7 @@ import yaml
 from pkg_resources import Requirement, resource_string
 
 import crib
-from crib import exceptions
+from crib import exceptions, injection
 
 
 class AbstractConfigLoader(metaclass=abc.ABCMeta):
@@ -45,7 +45,7 @@ class YamlLoader(AbstractConfigLoader):
         return yaml.load(cfginput)
 
 
-def load(loaders: List[AbstractConfigLoader], config: IO[str]) -> Dict[str, Any]:
+def _load(loaders: List[AbstractConfigLoader], config: IO[str]) -> Dict[str, Any]:
     if not config:
         return {}
     for loader in loaders:
@@ -71,18 +71,41 @@ def _default_config() -> IO[str]:
     return default_config
 
 
-def load_default(loaders: List[AbstractConfigLoader]) -> Dict:
+def _load_default(loaders: List[AbstractConfigLoader]) -> Dict:
     default_config = _default_config()
-    cfg = load(loaders, default_config)
+    cfg = _load(loaders, default_config)
     return cfg
 
 
-def merge_config(default: Dict, override: Dict) -> Dict:
+def _merge_config(default: Dict, override: Dict) -> Dict:
     config = {s: cfg.copy() for s, cfg in default.items()}
     for override_section, configuration in override.items():
         section = config.setdefault(override_section, {})
         section.update(configuration)
     return config
+
+
+class LoadedConfiguration(injection.Component):
+    """Configuration which is loaded through a config loader component.
+    """
+
+    config_file = injection.Dependency()
+    config_loaders = injection.Dependency()
+
+    def __init__(self, name, container):
+        super().__init__(name, container)
+        self._cfg = None
+
+    def __getitem__(self, key):
+        if self._cfg is None:
+            self._cfg = self.load()
+        return self._cfg.get(key, {})
+
+    def load(self):
+        default = _load_default(self.config_loaders)
+        user_cfg = _load(self.config_loaders, self.config_file)
+        cfg = _merge_config(default, user_cfg)
+        return cfg
 
 
 @crib.hookimpl

@@ -2,15 +2,17 @@
 Model base class
 """
 from collections.abc import Mapping
-from typing import Any, Dict, Iterator, Union
+from typing import Any, Callable, Dict, Iterator, Union
 
 import cerberus  # type: ignore
 
 from crib.exceptions import InvalidData
 
+SchemaType = Dict[str, Dict[str, Union[str, bool, Dict, Callable]]]
+
 
 class Model(Mapping):
-    schema: Dict[str, Dict[str, Union[str, bool]]] = {}
+    schema: SchemaType = {}
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()

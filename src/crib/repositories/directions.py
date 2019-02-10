@@ -2,9 +2,7 @@
 Repository for route data
 """
 import abc
-from typing import Any, Dict, Iterable, List, Type, TypeVar
-
-import pymongo  # type: ignore
+from typing import Dict, Iterable, List, Type, TypeVar
 
 import crib
 from crib import plugins
@@ -14,8 +12,6 @@ from . import mongo
 
 
 class DirectionsRepo(plugins.Plugin):
-    pass
-
     @abc.abstractmethod
     def insert(self, direction: Direction) -> None:
         pass

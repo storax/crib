@@ -1,25 +1,17 @@
 """
 Common base classes
 """
-from crib import app
+from crib import injection
 
 
-class WithConfig(object):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.config = {}
-
+class WithInjection(injection.Component):
     @classmethod
-    def from_crawler(cls, crawler):
-        from_crawler = getattr(super(WithConfig, cls), "from_crawler", None)
-        instance = from_crawler(crawler) if from_crawler else cls()
-        instance.config = crawler.settings.getdict("CRIB")
-        return instance
-
-
-class WithRepo(WithConfig):
-    @classmethod
-    def from_crawler(cls, crawler):
-        instance = super(WithRepo, cls).from_crawler(crawler)
-        instance.repo = app.get_property_repository(instance.config)
+    def from_crawler(cls, crawler, *args, **kwargs):
+        from_crawler = getattr(super(WithInjection, cls), "from_crawler", None)
+        if from_crawler:
+            instance = from_crawler(
+                crawler, cls.__name__, crawler.settings["CONTAINER"], *args, **kwargs
+            )
+        else:
+            instance = cls(cls.__name__, crawler.settings["CONTAINER"], *args, **kwargs)
         return instance

@@ -1,14 +1,12 @@
 """
 Property model
 """
-from typing import Dict, Union
-
-from crib.domain.model import Model
+from crib.domain.model import Model, SchemaType
 from crib.validation import vbool, vdict, vdt, vfloat, vint, vlist, vstr
 
 
 class Property(Model):
-    schema: Dict[str, Dict[str, Union[str, bool, Dict]]] = {
+    schema: SchemaType = {
         "bedrooms": vint(),
         "displayAddress": vstr(),
         "featuredProperty": vbool(0),

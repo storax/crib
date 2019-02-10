@@ -17,7 +17,10 @@ def find(order_by=None,):
     order_by = json.get("order_by", {})
     try:
         props = [
-            dict(p) for p in current_app.prop_repo.find(order_by=order_by, limit=limit)
+            dict(p)
+            for p in current_app.property_repository.find(
+                order_by=order_by, limit=limit
+            )
         ]
     except exceptions.InvalidQuery as err:
         return jsonify({"msg": str(err)}), 400

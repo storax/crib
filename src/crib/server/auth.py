@@ -37,7 +37,7 @@ def check_if_token_in_blacklist(decrypted_token):
 
 
 def register(username, password):
-    repo = current_app.user_repo
+    repo = current_app.user_repository
     error = None
 
     if not username:
@@ -64,7 +64,7 @@ def login():
     if not password:
         return jsonify({"msg": "Missing password parameter"}), 400
 
-    repo = current_app.user_repo
+    repo = current_app.user_repository
     invalid_msg = jsonify({"msg": "Invalid Credentials"}), 401
     try:
         user = repo.get_user(username)

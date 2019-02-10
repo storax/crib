@@ -3,9 +3,8 @@ Directions service
 """
 import abc
 import logging
-from typing import Any, Dict, Iterable, List, NamedTuple, Type, TypeVar
+from typing import Any, Dict, Iterable, NamedTuple, Type, TypeVar
 
-import cerberus  # type: ignore
 import requests
 
 import crib
@@ -102,7 +101,7 @@ class GoogleDirections(DirectionsService):
         if data["status"] != "OK":
             if data["status"] == "ZERO_RESULTS":
                 return {}
-            raise exceptions.DirectionsError(status)
+            raise exceptions.DirectionsError(data)
         route = data["routes"][0]["legs"][0]
         route["overview_polyline"] = data["routes"][0]["overview_polyline"]
 

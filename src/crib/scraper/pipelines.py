@@ -5,9 +5,12 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
+from crib import injection
 from crib.scraper import base
 
 
-class CribPipeline(base.WithRepo):
+class CribPipeline(base.WithInjection):
+    property_repository = injection.Dependency()
+
     def process_item(self, item, spider):
-        self.repo.insert(item["prop"])
+        self.property_repository.insert(item["prop"])
