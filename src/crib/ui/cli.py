@@ -28,7 +28,7 @@ click_log.basic_config(_log)
 def main(ctx: click.Context, config: IO[str]) -> None:
     """Find the best properties with crib!"""
 
-    class Container(app.App):
+    class Container(app.AppContainer):
         config_file = injection.ObjectProvider(config)
 
     ctx.obj = Container()
@@ -73,7 +73,7 @@ def browse(obj) -> None:
 
 
 def create_app_wrapper(*args, **kwargs):
-    ctx = click.get_current_context()
+    ctx = click.get_current_context().find_root()
     container = ctx.obj
     return create_app(container)
 

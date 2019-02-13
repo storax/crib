@@ -1,6 +1,8 @@
 """
 Direction model
 """
+from typing import NamedTuple
+
 from crib.domain.model import Model, SchemaType
 from crib.validation import vdict, vfloat, vint, vlist, vstr
 
@@ -9,6 +11,11 @@ _distance = _duration = vdict({"value": vint(), "text": vstr()})
 _latlng = vdict({"lat": vfloat(), "lng": vfloat()})
 _location = vdict({"latitude": vfloat(), "longitude": vfloat()})
 _time = vdict({"text": vstr(), "time_zone": vstr(), "value": vint()}, False)
+
+
+class Location(NamedTuple):
+    latitude: float
+    longitude: float
 
 
 class Direction(Model):

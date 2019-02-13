@@ -16,11 +16,12 @@ class Flask(injection.Component, flask.Flask):
     property_repository = injection.Dependency()
     directions_service = injection.Dependency()
     directions_repository = injection.Dependency()
+    property_service = injection.Dependency()
 
 
 def create_app(container):
     # create and configure the app
-    app = flask.Flask("server", container, __name__)
+    app = Flask("server", container, __name__)
     app.config.from_mapping(
         JWT_SECRET_KEY="dev",
         JWT_BLACKLIST_ENABLED=True,

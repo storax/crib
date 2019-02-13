@@ -3,22 +3,23 @@ Directions service
 """
 import abc
 import logging
-from typing import Any, Dict, Iterable, NamedTuple, Type, TypeVar
+from typing import Any, Dict, Iterable, Type, TypeVar
 
+import cmocean  # type: ignore
+import numpy  # type: ignore
 import requests
+from matplotlib.colors import rgb2hex  # type: ignore
 
 import crib
-from crib import exceptions, plugins
+from crib import exceptions, injection, plugins
+from crib.domain.direction import Location
 
 log = logging.getLogger(__name__)
 
 
-class Location(NamedTuple):
-    latitude: float
-    longitude: float
-
-
 class DirectionsService(plugins.Plugin):
+    directions_repository = injection.Dependency()
+
     @classmethod
     def config_schema(cls) -> Dict[str, Any]:
         return {
@@ -72,6 +73,40 @@ class DirectionsService(plugins.Plugin):
         for lat in frange(sw["lat"], ne["lat"], latdelta / 100):
             for lng in frange(sw["lng"], ne["lng"], lngdelta / 100):
                 yield {"latitude": lat, "longitude": lng}
+
+    def to_work_durations(
+        self, colormap: str = "thermal_r"
+    ) -> Iterable[Dict[str, Any]]:
+        try:
+            cmap = cmocean.cm.cmap_d[colormap]
+        except KeyError:
+            raise ValueError(f"Invalid color map {colormap}")
+
+        durations = list(self.directions_repository.get_to_work_durations())
+        sortkey = lambda d: d["durationValue"]
+        maxD = max(durations, key=sortkey)["durationValue"]
+        minD = min(durations, key=sortkey)["durationValue"]
+
+        colors = self._color_values(minD, maxD, cmap)
+
+        offset = minD + 1
+        for d in durations:
+            v = d.pop("durationValue")
+            d["color"] = colors[v - offset]
+        log.debug("Fetched %s durations", len(durations))
+
+        return durations
+
+    def colormaps(self) -> Iterable[str]:
+        return list(cmocean.cm.cmap_d.keys())
+
+    @staticmethod
+    def _color_values(minV, maxV, colormap):
+        delta = maxV - minV
+        colormap = colormap._resample(delta)
+        rgb_values = colormap(numpy.arange(delta))[:, :-1]
+        hex_values = [rgb2hex(rgb) for rgb in rgb_values]
+        return hex_values
 
 
 class GoogleDirections(DirectionsService):
