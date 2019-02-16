@@ -52,3 +52,7 @@ class UnknownOrder(InvalidQuery):
 
 class DirectionsError(Exception):
     pass
+
+
+class InvalidCredentials(Exception):
+    pass

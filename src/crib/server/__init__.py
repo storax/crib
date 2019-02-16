@@ -17,6 +17,7 @@ class Flask(injection.Component, flask.Flask):
     directions_service = injection.Dependency()
     directions_repository = injection.Dependency()
     property_service = injection.Dependency()
+    auth_service = injection.Dependency()
 
 
 def create_app(container):

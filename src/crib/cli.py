@@ -98,10 +98,13 @@ def run(ctx):
 @click.password_option("--password")
 @click.pass_context
 def add_user(ctx: click.Context, username: str, password: str) -> None:
+    container = ctx.obj
     try:
-        auth.register(username, password)
+        container.auth_service.register(username, password)
     except exceptions.DuplicateUser:
         raise click.UsageError(f"User {username} already exists")
+    except ValueError as err:
+        raise click.UsageError(str(err))
     else:
         click.echo(f"User {username} created")
 
@@ -110,4 +113,4 @@ def add_user(ctx: click.Context, username: str, password: str) -> None:
 @click.argument("mode", type=click.Choice(["transit"]))
 @click.pass_context
 def fetch_to_work(ctx: click.Context, mode) -> None:
-    directions.fetch_map_to_work(mode)
+    ctx.obj.directions_service.fetch_map_to_work(mode)

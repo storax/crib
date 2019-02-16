@@ -36,22 +36,6 @@ def check_if_token_in_blacklist(decrypted_token):
     return jti in blacklist
 
 
-def register(username, password):
-    repo = current_app.user_repository
-    error = None
-
-    if not username:
-        error = "Username is required."
-    elif not password:
-        error = "Password is required."
-
-    if error:
-        raise ValueError(error)
-
-    user = User(username=username, password=generate_password_hash(password))
-    repo.add_user(user)
-
-
 @bp.route("/login", methods=("POST",))
 def login():
     if not request.is_json:
@@ -64,22 +48,12 @@ def login():
     if not password:
         return jsonify({"msg": "Missing password parameter"}), 400
 
-    repo = current_app.user_repository
-    invalid_msg = jsonify({"msg": "Invalid Credentials"}), 401
-    try:
-        user = repo.get_user(username)
-    except exceptions.EntityNotFound:
+    tokens = current_app.auth_service.get_tokens(username, password)
+    if not tokens:
+        invalid_msg = jsonify({"msg": "Invalid Credentials"}), 401
         return invalid_msg
 
-    if not check_password_hash(user["password"], password):
-        return invalid_msg
-
-    ret = {
-        "access_token": create_access_token(identity=username),
-        "refresh_token": create_refresh_token(identity=username),
-        "username": username,
-    }
-    return jsonify(ret), 200
+    return jsonify(tokens, 200)
 
 
 @bp.route("/refresh", methods=("POST",))

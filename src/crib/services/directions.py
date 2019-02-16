@@ -12,7 +12,7 @@ from matplotlib.colors import rgb2hex  # type: ignore
 
 import crib
 from crib import exceptions, injection, plugins
-from crib.domain.direction import Location
+from crib.domain.direction import Direction, Location
 
 log = logging.getLogger(__name__)
 
@@ -63,7 +63,13 @@ class DirectionsService(plugins.Plugin):
     def fetch_map_to_work(self, mode: str) -> Iterable[Dict]:
         for i, ll in list(enumerate(self.raster_map())):
             log.info("Fetching #%s", i)
-            yield self.to_work(Location(**ll), mode)
+            route = self.to_work(Location(**ll), mode)
+            try:
+                d = Direction(route)
+            except Exception as err:
+                log.info("%s".err)
+            else:
+                self.directions_repository.insert(d)
 
     def raster_map(self) -> Iterable[Dict]:
         ne = self.config["search-area"]["northEast"]

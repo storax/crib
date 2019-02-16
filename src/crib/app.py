@@ -4,6 +4,7 @@ Crib application
 from crib import injection
 from crib.config import LoadedConfiguration
 from crib.plugin_loader import ConfiguredPluginProvider, PluginsProvider, hook
+from crib.services.auth import AuthService
 from crib.services.properties import PropertyService
 
 
@@ -16,3 +17,4 @@ class AppContainer(injection.Container):
     user_repository = ConfiguredPluginProvider(hook.crib_add_user_repos)
     property_service = injection.SingletonProvider(PropertyService)
     property_repository = ConfiguredPluginProvider(hook.crib_add_property_repos)
+    auth_service = injection.SingletonProvider(AuthService)

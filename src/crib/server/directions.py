@@ -6,10 +6,6 @@ import logging
 from flask import Blueprint, current_app, jsonify, request  # type: ignore
 from flask_jwt_extended import jwt_required  # type: ignore
 
-from crib import exceptions
-from crib.domain.direction import Direction, Location
-from crib.domain.property import Property
-
 bp = Blueprint("directions", __name__, url_prefix="/directions")
 log = logging.getLogger(__name__)
 
@@ -36,13 +32,3 @@ def to_work_durations():
         return jsonify(durations)
     except ValueError as err:
         return jsonify({"msg": str(err)}), 400
-
-
-def fetch_map_to_work(mode):
-    for route in current_app.directions_service.fetch_map_to_work(mode):
-        try:
-            d = Direction(route)
-        except Exception as err:
-            print(err)
-            continue
-        current_app.directions_repository.insert(d)
