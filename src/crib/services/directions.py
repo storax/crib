@@ -3,6 +3,7 @@ Directions service
 """
 import abc
 import logging
+import operator
 from typing import Any, Dict, Iterable, Type, TypeVar
 
 import cmocean  # type: ignore
@@ -89,9 +90,9 @@ class DirectionsService(plugins.Plugin):
             raise ValueError(f"Invalid color map {colormap}")
 
         durations = list(self.directions_repository.get_to_work_durations())
-        sortkey = lambda d: d["durationValue"]
-        maxD = max(durations, key=sortkey)["durationValue"]
-        minD = min(durations, key=sortkey)["durationValue"]
+        getDuration = operator.itemgetter("durationValue")
+        maxD = getDuration(max(durations, key=getDuration))
+        minD = getDuration(min(durations, key=getDuration))
 
         colors = self._color_values(minD, maxD, cmap)
 

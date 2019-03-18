@@ -73,8 +73,7 @@ Here is an example ``config.yaml``::
     RIGHTMOVE_SEARCHES:
       - "https://www.rightmove.co.uk/property-to-rent/find.html?searchType=RENT&locationIdentifier=REGION%5E1498&insId=1&radius=0.0&minPrice=&maxPrice=&minBedrooms=&maxBedrooms=&displayPropertyType=&maxDaysSinceAdded=&sortByPriceDescending=&_includeLetAgreed=on&primaryDisplayPropertyType=&secondaryDisplayPropertyType=&oldDisplayPropertyType=&oldPrimaryDisplayPropertyType=&letType=&letFurnishType=&houseFlatShare="
 
-Crib provides a ``crib`` CLI. The ``crib scrape`` command exposes the `Scrapy
-CLI <https://github.com/scrapy/scrapy/>`_. So you can scrape properties via::
+Crib provides a ``crib`` CLI. You can scrape properties via::
 
   crib -c config.yaml scrape crawl rightmove
 
@@ -82,6 +81,10 @@ Crib comes with a default configuration for scrapy. You can override them in the
 scrape section of the config. See the `scrapy documentation
 <https://docs.scrapy.org/en/latest/topics/settings.html>`_ for available
 settings.
+
+List availabile spiders with::
+
+  crib -c config.yaml scrape list
 
 Google Directions Service
 +++++++++++++++++++++++++

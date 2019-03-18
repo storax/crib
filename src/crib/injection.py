@@ -31,10 +31,7 @@ when a component accesses a dependency. The dependency injection is lazy::
 
 """
 import abc
-import itertools
-from typing import Any, Dict, List, Type, TypeVar, Union
-
-from crib import exceptions
+from typing import Type, TypeVar, Union
 
 
 class Container:

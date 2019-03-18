@@ -83,7 +83,6 @@ scrape:
   # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
   DOWNLOADER_MIDDLEWARES:
     scrapy.downloadermiddlewares.httpcache.HttpCacheMiddleware: 100
-    # crib.scraper.middlewares.CribDownloaderMiddleware: 543
 
   # Enable or disable extensions
   # See https://doc.scrapy.org/en/latest/topics/extensions.html

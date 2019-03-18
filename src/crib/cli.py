@@ -3,19 +3,15 @@ The CLI interface for crib.
 """
 import code
 import logging
-import os
-import sys
-import types
-from typing import IO, List
+from typing import IO
 
 import click
 import click_log  # type: ignore
 from flask import current_app  # type: ignore
 from flask.cli import FlaskGroup, ScriptInfo  # type: ignore
-from scrapy.cmdline import execute  # type: ignore
 
 from crib import app, exceptions, injection
-from crib.server import auth, create_app, directions
+from crib.server import create_app
 
 _log = logging.getLogger("crib")
 click_log.basic_config(_log)
@@ -34,24 +30,30 @@ def main(ctx: click.Context, config: IO[str]) -> None:
     ctx.obj = Container()
 
 
-@main.command(context_settings=dict(ignore_unknown_options=True), add_help_option=False)
-@click.argument("scrapy_args", nargs=-1, type=click.UNPROCESSED)
+@main.group()
 @click.pass_obj
-def scrape(obj, scrapy_args: List[str]) -> None:
-    """Scrape property websites and store them in a repository.
+def scrape(obj):
+    """Scrape properties."""
+    pass
 
-    Forwards all arguments to scrapy.
+
+@scrape.command()
+@click.argument("spider")
+@click.option("--loglevel", default="DEBUG", help="The loglevel for scrapy.")
+@click.pass_obj
+def crawl(obj, spider: str, loglevel: str) -> None:
+    """Scrape with the given spider.
     """
-    argv = ["scrapy"]
-    argv.extend(scrapy_args)
-    settings_module = types.ModuleType("_crib_scrapy_settings_")
-    scrape_cfg = obj.config["scrape"]
-    settings_module.__dict__.update(scrape_cfg)
-    settings_module.CONTAINER = obj  # type: ignore
-    sys.modules[settings_module.__name__] = settings_module
-    os.environ["SCRAPY_SETTINGS_MODULE"] = settings_module.__name__
+    obj.scrape.crawl(spider, loglevel)
 
-    execute(argv)
+
+@scrape.command()
+@click.pass_obj
+def list(obj) -> None:
+    """List all spiders.
+    """
+    for spider in obj.scrape.list_spiders():
+        click.echo(spider)
 
 
 @main.command()
