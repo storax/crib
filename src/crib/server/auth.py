@@ -53,7 +53,7 @@ def login():
         invalid_msg = jsonify({"msg": "Invalid Credentials"}), 401
         return invalid_msg
 
-    return jsonify(tokens, 200)
+    return jsonify(tokens), 200
 
 
 @bp.route("/refresh", methods=("POST",))

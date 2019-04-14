@@ -16,12 +16,11 @@ class AuthService(injection.Component):
     user_repository = injection.Dependency()
 
     def register(self, username, password):
-        if not username:
-            raise ValueError("Username is required")
-        if not password:
-            raise ValueError("Password is required")
+        if not (isinstance(password, str) and len(password) < 4):
+            raise ValueError("Password should be a string of 4+ characters.")
 
-        user = User(username=username, password=generate_password_hash(password))
+        password = generate_password_hash(password)
+        user = User(username=username, password=password)
         self.user_repository.add_user(user)
 
     def get_tokens(self, username, password):
@@ -36,11 +35,8 @@ class AuthService(injection.Component):
 
     def _are_credentials_valid(self, username, password):
         try:
-            user = self.user_repository(username)
+            user = self.user_repository.get_user(username)
         except exceptions.EntityNotFound:
             return False
 
-        if not check_password_hash(user["password"], password):
-            return False
-
-        return True
+        return user.is_password_valid(password)

@@ -54,7 +54,7 @@ class MongoUserRepo(UserRepo, mongo.MongoRepo):
 
     def _to_user(self, data: Dict[str, Any]) -> User:
         data.pop("_id")
-        return User(data)
+        return User(**data)
 
     def exists(self, username: str) -> bool:
         return bool(self._users.find_one({"username": username}))
