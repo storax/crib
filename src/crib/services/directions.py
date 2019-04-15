@@ -82,15 +82,22 @@ class DirectionsService(plugins.Plugin):
                 yield {"latitude": lat, "longitude": lng}
 
     def to_work_durations(
-        self, colormap: str = "thermal_r"
+        self, colormap: str, maxDuration: int
     ) -> Iterable[Dict[str, Any]]:
         try:
             cmap = cmocean.cm.cmap_d[colormap]
         except KeyError:
             raise ValueError(f"Invalid color map {colormap}")
 
-        durations = list(self.directions_repository.get_to_work_durations())
         getDuration = operator.itemgetter("durationValue")
+        durations = [
+            dur
+            for dur in self.directions_repository.get_to_work_durations()
+            if getDuration(dur) < maxDuration
+        ]
+        if not durations:
+            return durations
+
         maxD = getDuration(max(durations, key=getDuration))
         minD = getDuration(min(durations, key=getDuration))
 
@@ -98,7 +105,7 @@ class DirectionsService(plugins.Plugin):
 
         offset = minD + 1
         for d in durations:
-            v = d.pop("durationValue")
+            v = d["durationValue"]
             d["color"] = colors[v - offset]
         log.debug("Fetched %s durations", len(durations))
 

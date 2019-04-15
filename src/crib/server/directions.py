@@ -27,8 +27,12 @@ def colormaps():
 @bp.route("/to_work_durations", methods=("GET",))
 @jwt_required
 def to_work_durations():
+    maxDuration = request.args.get("maxDuration", 3000, int)
+    colormap = request.args.get("colormap", "thermal_r")
     try:
-        durations = current_app.directions_service.to_work_durations(**request.args)
+        durations = current_app.directions_service.to_work_durations(
+            colormap=colormap, maxDuration=maxDuration
+        )
         return jsonify(durations)
     except ValueError as err:
         return jsonify({"msg": str(err)}), 400
