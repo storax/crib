@@ -35,7 +35,7 @@ class Plugin(PluginComponent):
 
         if not validator.validate(cfg):
             raise exceptions.ConfigError(
-                f"Invalid config for {self.name()}", validator.errors
+                f"Invalid config for {self.name}", validator.errors
             )
         self.config = validator.document
 

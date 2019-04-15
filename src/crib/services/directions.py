@@ -2,6 +2,7 @@
 Directions service
 """
 import abc
+import datetime
 import logging
 import operator
 from typing import Any, Dict, Iterable, Type, TypeVar
@@ -32,7 +33,6 @@ class DirectionsService(plugins.Plugin):
                     "longitude": {"type": "float", "required": True},
                 },
             },
-            "arrival-time": {"type": "integer", "required": True},
             "search-area": {
                 "type": "dict",
                 "required": True,
@@ -140,7 +140,7 @@ class GoogleDirections(DirectionsService):
             "key": key,
             "origin": ",".join((str(origin.latitude), str(origin.longitude))),
             "destination": ",".join((str(work.latitude), str(work.longitude))),
-            "arrival_time": self.config["arrival-time"],
+            "arrival_time": next_monday_morning(),
             "mode": mode,
         }
         response = requests.get(self._URL, args)
@@ -149,6 +149,7 @@ class GoogleDirections(DirectionsService):
         data = response.json()
         if data["status"] != "OK":
             if data["status"] == "ZERO_RESULTS":
+                log.warning("Zero results for %s", origin)
                 return {}
             raise exceptions.DirectionsError(data)
         route = data["routes"][0]["legs"][0]
@@ -180,3 +181,10 @@ def frange(x, y, jump=1.0):
         i += 1.0
         x = x0 + i * jump
         yield x
+
+
+def next_monday_morning():
+    date = datetime.datetime.utcnow()
+    day = 0  # monday
+    monday = date + datetime.timedelta(days=(day - date.weekday() + 7) % 7)
+    return int(monday.replace(hour=9, minute=30, second=0, microsecond=0).timestamp())

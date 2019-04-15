@@ -99,7 +99,6 @@ set it in the ``config.yaml``. You can also specify your place of work::
     work-location:
       latitude: 51.0
       longitude: 0.0
-    arrival-time: 1547458200
 
 Setup user
 ++++++++++
