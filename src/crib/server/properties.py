@@ -44,3 +44,41 @@ def to_work():
         return jsonify({"msg": str(err)}), 400
 
     return jsonify(route)
+
+
+@bp.route("/favorite", methods=("PUT",))
+@jwt_required
+def favorite():
+    json = request.json
+    prop_id = json.get("prop_id")
+    favorite = json.get("favorite")
+    if prop_id is None:
+        return jsonify({"msg": "prop_id is missing"}), 400
+    if favorite is None:
+        return jsonify({"msg": "favorite is missing"}), 400
+
+    try:
+        current_app.property_service.favorite(prop_id, favorite)
+    except exceptions.EntityNotFound as err:
+        return jsonify({"msg": str(err)}), 400
+
+    return jsonify({"msg": "success"}), 200
+
+
+@bp.route("/ban", methods=("PUT",))
+@jwt_required
+def ban():
+    json = request.json
+    prop_id = json.get("prop_id")
+    banned = json.get("banned")
+    if prop_id is None:
+        return jsonify({"msg": "prop_id is missing"}), 400
+    if banned is None:
+        return jsonify({"msg": "banned is missing"}), 400
+
+    try:
+        current_app.property_service.ban(prop_id, banned)
+    except exceptions.EntityNotFound as err:
+        return jsonify({"msg": str(err)}), 400
+
+    return jsonify({"msg": "success"}), 200

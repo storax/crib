@@ -31,9 +31,19 @@ class PropertyService(plugins.Plugin):
 
         route = self.directions_service.to_work(origin, mode)
 
-        prop_d = dict(prop)
-        prop_d["toWork"] = route
-
-        self.property_repository.update(Property(prop_d))
+        prop = prop.set("toWork", route)
+        self.property_repository.update(prop)
 
         return route
+
+    def favorite(self, prop_id: str, val: bool):
+        prop = self.property_repository.get(prop_id)
+        if prop["favorite"] != val:
+            prop = prop.set("favorite", val)
+            self.property_repository.update(prop)
+
+    def ban(self, prop_id: str, val: bool):
+        prop = self.property_repository.get(prop_id)
+        if prop["banned"] != val:
+            prop = prop.set("banned", val)
+            self.property_repository.update(prop)

@@ -36,3 +36,8 @@ class Model(Mapping):
 
     def __str__(self) -> str:
         return f"{self._storage}"
+
+    def set(self, key, value):
+        s = self._storage.copy()
+        s[key] = value
+        return type(self)(**s)
