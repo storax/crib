@@ -123,7 +123,7 @@ class MongoPropertyRepo(PropertyRepo, mongo.MongoRepo):
 
     def find(self, order_by=(), limit=1000) -> Iterable[Property]:
         queried_props = self._props.find(
-            {"floorplanImages": {"$exists": True, "$ne": []}, "banned": {"$ne": True}}
+            {"propertyImages.3": {"$exists": True}, "banned": {"$ne": True}}
         )
         if order_by:
             order_by = [(field, self._to_order(i)) for field, i in order_by]
