@@ -1,10 +1,7 @@
 import logging
 
 from flask_jwt_extended import create_access_token, create_refresh_token  # type: ignore
-from werkzeug.security import (  # type: ignore
-    check_password_hash,
-    generate_password_hash,
-)
+from werkzeug.security import generate_password_hash  # type: ignore
 
 from crib import exceptions, injection
 from crib.domain.user import User

@@ -11,6 +11,8 @@ from flask import current_app  # type: ignore
 from flask.cli import FlaskGroup, ScriptInfo  # type: ignore
 
 from crib import app, exceptions, injection
+from crib.config import LoadedConfiguration
+from crib.plugin_loader import PluginsProvider, hook
 from crib.server import create_app
 
 _log = logging.getLogger("crib")
@@ -25,6 +27,8 @@ def main(ctx: click.Context, config: IO[str]) -> None:
     """Find the best properties with crib!"""
 
     class Container(app.AppContainer):
+        config = injection.SingletonProvider(LoadedConfiguration)
+        config_loaders = PluginsProvider(hook.crib_add_config_loaders)
         config_file = injection.ObjectProvider(config)
 
     ctx.obj = Container()

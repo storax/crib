@@ -3,7 +3,7 @@ from typing import List, Type, TypeVar
 import pluggy  # type: ignore
 
 from crib import config, exceptions, plugins
-from crib.injection import AbstractProvider, Component, Container
+from crib.injection import AbstractProvider, Container
 from crib.repositories import directions as dirrepo
 from crib.repositories import properties, user
 from crib.services import directions
@@ -88,35 +88,33 @@ class PluginsProvider(AbstractProvider):
         self._hook = hook
         self._plugins = None
 
-    def __get__(self, container: Container, T) -> List[Component]:
+    def __get__(self, container: Container, T) -> List:
         if self._plugins is None:
             self._plugins = self._load_plugins()
         return self._plugins
 
-    def _load_plugins(self) -> List[Component]:
+    def _load_plugins(self) -> List:
         plugins = [plugin for plugins in self._hook() for plugin in plugins]
         return plugins
 
 
-class ConfiguredPluginProvider(PluginsProvider):
+class ConfiguredPluginProvider(AbstractProvider):
     """Provides a plugin which matches the 'type' in the configuration.
 
     This requires a feature called 'config'.
     """
 
     def __init__(self, hook):
-        super().__init__(hook)
+        self._plugins_provider = PluginsProvider(hook)
         self._component = None
 
     def __get__(self, container: Container, T) -> plugins.PluginComponent:
         if self._component is None:
-            plugins = super().__get__(container, T)
+            plugins = self._plugins_provider.__get__(container, T)
             self._component = self._load_component(container, plugins)
         return self._component
 
-    def _load_component(
-        self, container: Container, plugins: List[Component]
-    ) -> Component:
+    def _load_component(self, container, plugins) -> plugins.PluginComponent:
         plugin_config = container.config[self.feature]
         plugin_type = plugin_config["type"]
         for plugin in plugins:

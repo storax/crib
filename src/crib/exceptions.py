@@ -56,3 +56,7 @@ class DirectionsError(Exception):
 
 class InvalidCredentials(Exception):
     pass
+
+
+class InjectionError(Exception):
+    pass

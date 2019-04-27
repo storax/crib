@@ -33,6 +33,8 @@ when a component accesses a dependency. The dependency injection is lazy::
 import abc
 from typing import Any, Type, TypeVar, Union
 
+from crib.exceptions import InjectionError
+
 
 class Container:
     pass
@@ -61,7 +63,7 @@ class AbstractProvider(metaclass=abc.ABCMeta):
         self.feature = name
 
     @abc.abstractmethod
-    def __get__(self, container: Container, T) -> Component:
+    def __get__(self, container: Container, T) -> Any:
         """Return a component for the requested feature."""
         raise NotImplementedError()
 
@@ -110,7 +112,10 @@ class Dependency:
         if component is None:
             return self
 
-        return getattr(component._container, self.feature)
+        try:
+            return getattr(component._container, self.feature)
+        except AttributeError:
+            raise InjectionError(f"Feature {self.feature} not configured.")
 
 
 class Infrastructure(Dependency):

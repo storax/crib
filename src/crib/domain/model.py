@@ -24,3 +24,6 @@ class Model:
 
     def asdict(self):
         return converter.unstructure(self)
+
+    def replace(self, **changes):
+        return attr.evolve(self, **changes)
