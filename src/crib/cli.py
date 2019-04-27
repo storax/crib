@@ -25,9 +25,11 @@ click_log.basic_config(_log)
 def main(ctx: click.Context, config: IO[str]) -> None:
     """Find the best properties with crib!"""
 
+    config_file_provider = injection.ObjectProvider(config)
+
     class Container(app.AppContainer):
+        config_file = config_file_provider
         config = injection.SingletonProvider(LoadedConfiguration)
-        config_file = injection.ObjectProvider(config)
 
     ctx.obj = Container()
 
