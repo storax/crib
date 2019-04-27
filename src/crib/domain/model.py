@@ -1,43 +1,26 @@
 """
 Model base class
 """
-from collections.abc import Mapping
-from typing import Any, Callable, Dict, Iterator, Union
+from datetime import datetime
 
-import cerberus  # type: ignore
+import attr
+import cattr  # type: ignore
 
 from crib.exceptions import InvalidData
 
-SchemaType = Dict[str, Dict[str, Union[str, bool, Dict, Callable]]]
+converter = cattr.Converter()
+converter.register_unstructure_hook(datetime, lambda dt: dt)
+converter.register_structure_hook(datetime, lambda ts, _: ts)
 
 
-class Model(Mapping):
-    schema: SchemaType = {}
+@attr.s
+class Model:
+    @classmethod
+    def fromdict(cls, data):
+        try:
+            return converter.structure(data, cls)
+        except (ValueError, TypeError) as err:
+            raise InvalidData("Invalid data", {"unknown": str(err)})
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__()
-        data = dict(*args, **kwargs)
-        self._storage = self._validate(data)
-
-    def _validate(self, data: Dict) -> Dict[str, Any]:
-        validator = cerberus.Validator(self.schema)
-        if not validator.validate(data):
-            raise InvalidData(f"Invalid data", validator.errors)
-        return validator.document
-
-    def __getitem__(self, key: str):
-        return self._storage[key]
-
-    def __iter__(self) -> Iterator[str]:
-        return iter(self._storage)
-
-    def __len__(self) -> int:
-        return len(self._storage)
-
-    def __str__(self) -> str:
-        return f"{self._storage}"
-
-    def set(self, key, value):
-        s = self._storage.copy()
-        s[key] = value
-        return type(self)(**s)
+    def asdict(self):
+        return converter.unstructure(self)

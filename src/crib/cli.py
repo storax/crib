@@ -74,6 +74,14 @@ def browse(obj) -> None:
     _console.interact(banner="You can access the repository via the 'repo' variable.")
 
 
+@main.command()
+@click.pass_obj
+def clear_properties(obj) -> None:
+    """Delete all properties."""
+    repo = obj.property_repository
+    repo.delete_all()
+
+
 def create_app_wrapper(*args, **kwargs):
     ctx = click.get_current_context().find_root()
     container = ctx.obj

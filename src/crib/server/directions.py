@@ -1,5 +1,5 @@
 """
-Property data
+Direction endpoints
 """
 import logging
 

@@ -31,7 +31,7 @@ when a component accesses a dependency. The dependency injection is lazy::
 
 """
 import abc
-from typing import Type, TypeVar, Union
+from typing import Any, Type, TypeVar, Union
 
 
 class Container:
@@ -90,11 +90,11 @@ class SingletonProvider(FactoryProvider):
 
 
 class ObjectProvider(AbstractProvider):
-    def __init__(self, obj: Component):
+    def __init__(self, obj: Any):
         super().__init__()
         self.obj = obj
 
-    def __get__(self, container, T) -> Component:
+    def __get__(self, container, T) -> Any:
         return self.obj
 
 

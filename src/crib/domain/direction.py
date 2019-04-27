@@ -1,82 +1,109 @@
 """
 Direction model
 """
-from typing import NamedTuple
+from typing import Dict, Optional, Tuple
 
-from crib.domain.model import Model, SchemaType
-from crib.validation import vdict, vfloat, vint, vlist, vstr
+import attr
 
-_polyline = vdict({"points": vstr()})
-_distance = _duration = vdict({"value": vint(), "text": vstr()})
-_latlng = vdict({"lat": vfloat(), "lng": vfloat()})
-_location = vdict({"latitude": vfloat(), "longitude": vfloat()})
-_time = vdict({"text": vstr(), "time_zone": vstr(), "value": vint()}, False)
+from crib.domain.model import Model
 
 
-class Location(NamedTuple):
-    latitude: float
-    longitude: float
+@attr.s(frozen=True)
+class Location:
+    latitude: float = attr.ib()
+    longitude: float = attr.ib()
 
 
+@attr.s(frozen=True)
+class Polyline:
+    points: str = attr.ib()
+
+
+@attr.s(frozen=True)
+class Distance:
+    value: str = attr.ib()
+    text: str = attr.ib()
+
+
+@attr.s(frozen=True)
+class Duration:
+    value: str = attr.ib()
+    text: str = attr.ib()
+
+
+@attr.s(frozen=True)
+class LatLng:
+    lat: float = attr.ib()
+    lng: float = attr.ib()
+
+
+@attr.s(frozen=True)
+class Time:
+    text: str = attr.ib()
+    time_zone: str = attr.ib()
+    value: int = attr.ib()
+
+
+@attr.s(frozen=True)
+class Stop:
+    location: LatLng = attr.ib()
+    name: str = attr.ib()
+
+
+@attr.s(frozen=True)
+class Vehicle:
+    type: str = attr.ib()
+    name: str = attr.ib()
+    icon: str = attr.ib()
+    local_icon: Optional[str] = attr.ib(default=None)
+
+
+@attr.s(frozen=True)
+class Line:
+    vehicle: Vehicle = attr.ib()
+    url: Optional[str] = attr.ib(default=None)
+    name: Optional[str] = attr.ib(default=None)
+    text_color: Optional[str] = attr.ib(default=None)
+    short_name: Optional[str] = attr.ib(default=None)
+    color: Optional[str] = attr.ib(default=None)
+    agencies: Tuple[Dict, ...] = attr.ib(default=())
+
+
+@attr.s(frozen=True)
+class TransitDetails:
+    num_stops: int = attr.ib()
+    headsign: str = attr.ib()
+    line: Line = attr.ib()
+    arrival_stop: Optional[Stop] = attr.ib(default=None)
+    arrival_time: Optional[Time] = attr.ib(default=None)
+    departure_stop: Optional[Stop] = attr.ib(default=None)
+    departure_time: Optional[Time] = attr.ib(default=None)
+
+
+@attr.s(frozen=True)
+class Step:
+    html_instructions: str = attr.ib()
+    polyline: Polyline = attr.ib()
+    travel_mode: str = attr.ib()
+    start_location: LatLng = attr.ib()
+    end_location: LatLng = attr.ib()
+    duration: Duration = attr.ib()
+    distance: Distance = attr.ib()
+    transit_details: Optional[TransitDetails] = attr.ib(default=None)
+    steps: Tuple[Dict, ...] = attr.ib(default=())
+
+
+@attr.s(frozen=True)
 class Direction(Model):
-    schema: SchemaType = {
-        "overview_polyline": _polyline,
-        "duration": _duration,
-        "distance": _distance,
-        "arrival_time": _time,
-        "departure_time": _time,
-        "end_address": vstr(),
-        "end_location": _latlng,
-        "start_address": vstr(),
-        "via_waypoint": {"type": "list", "required": True},
-        "traffic_speed_entry": {"type": "list", "required": True},
-        "start_location": _latlng,
-        "steps": vlist(
-            vdict(
-                {
-                    "html_instructions": vstr(),
-                    "polyline": _polyline,
-                    "travel_mode": vstr(),
-                    "start_location": _latlng,
-                    "end_location": _latlng,
-                    "duration": _duration,
-                    "distance": _distance,
-                    "transit_details": vdict(
-                        {
-                            "num_stops": vint(),
-                            "arrival_stop": vdict(
-                                {"location": _latlng, "name": vstr()}, False
-                            ),
-                            "arrival_time": _time,
-                            "departure_time": _time,
-                            "departure_stop": vdict(
-                                {"location": _latlng, "name": vstr()}, False
-                            ),
-                            "headsign": vstr(),
-                            "line": vdict(
-                                {
-                                    "vehicle": vdict(
-                                        {
-                                            "type": vstr(),
-                                            "name": vstr(),
-                                            "icon": vstr(),
-                                            "local_icon": vstr(0),
-                                        }
-                                    ),
-                                    "url": vstr(0),
-                                    "name": vstr(0),
-                                    "text_color": vstr(0),
-                                    "short_name": vstr(0),
-                                    "color": vstr(0),
-                                    "agencies": vlist({"type": "dict"}),
-                                }
-                            ),
-                        },
-                        False,
-                    ),
-                    "steps": vlist({"type": "dict"}, False),
-                },
-                False,
-            )
-        ),
-    }
+    overview_polyline: Polyline = attr.ib()
+    duration: Duration = attr.ib()
+    distance: Distance = attr.ib()
+    end_address: str = attr.ib()
+    end_location: LatLng = attr.ib()
+    start_address: str = attr.ib()
+    start_location: LatLng = attr.ib()
+    steps: Tuple[Step, ...] = attr.ib()
+    arrival_time: Optional[Time] = attr.ib(default=None)
+    departure_time: Optional[Time] = attr.ib(default=None)
+    via_waypoint: Tuple = attr.ib(default=())
+    traffic_speed_entry: Tuple = attr.ib(default=())

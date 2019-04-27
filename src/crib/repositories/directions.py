@@ -41,10 +41,10 @@ class MemoryDirectionsRepo(DirectionsRepo):
         for d in self._storage:
             yield {
                 "location": {
-                    "latitude": d["start_location"]["lat"],
-                    "longitude": d["start_location"]["lng"],
+                    "latitude": d.start_location.lat,
+                    "longitude": d.start_location.lng,
                 },
-                "duration": d["duration"]["value"],
+                "duration": d.duration.value,
             }
 
 
@@ -54,13 +54,13 @@ class MongoDirectionsRepo(DirectionsRepo, mongo.MongoRepo):
         return self.db.directions
 
     def insert(self, direction: Direction) -> None:
-        d = dict(direction)
+        d = direction.asdict()
         self._directions.insert_one(d)
 
     def get_all(self) -> Iterable[Direction]:
         for d in self._directions.find():
             d.pop("_id")
-            yield Direction(d)
+            yield Direction.fromdict(d)
 
     def get_to_work_durations(self) -> Iterable[Dict]:
         for d in self._directions.find():

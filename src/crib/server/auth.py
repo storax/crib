@@ -4,19 +4,11 @@ from flask import Blueprint, current_app, jsonify, request  # type: ignore
 from flask_jwt_extended import (  # type: ignore
     JWTManager,
     create_access_token,
-    create_refresh_token,
     get_jwt_identity,
     get_raw_jwt,
     jwt_refresh_token_required,
     jwt_required,
 )
-from werkzeug.security import (  # type: ignore
-    check_password_hash,
-    generate_password_hash,
-)
-
-from crib import exceptions
-from crib.domain.user import User
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 

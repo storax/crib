@@ -61,14 +61,14 @@ class DirectionsService(plugins.Plugin):
     def to_work(self, origin: Location, mode: str) -> Dict:
         return {}
 
-    def fetch_map_to_work(self, mode: str) -> Iterable[Dict]:
+    def fetch_map_to_work(self, mode: str) -> None:
         for i, ll in list(enumerate(self.raster_map())):
             log.info("Fetching #%s", i)
             route = self.to_work(Location(**ll), mode)
             try:
-                d = Direction(route)
+                d = Direction.fromdict(route)
             except Exception as err:
-                log.info("%s".err)
+                log.info("%s", err)
             else:
                 self.directions_repository.insert(d)
 

@@ -1,9 +1,9 @@
 """
 Package for scraping property sites like rightmove.co.uk.
 """
-from scrapy.spiderloader import SpiderLoader
-from scrapy.crawler import CrawlerProcess
-from scrapy.settings import Settings
+from scrapy.spiderloader import SpiderLoader  # type: ignore
+from scrapy.crawler import CrawlerProcess  # type: ignore
+from scrapy.settings import Settings  # type: ignore
 
 from crib import injection
 

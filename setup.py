@@ -50,6 +50,8 @@ setup(
     ],
     keywords=[],
     install_requires=[
+        "attrs",
+        "cattrs",
         "chardet",
         "cerberus",
         "click",

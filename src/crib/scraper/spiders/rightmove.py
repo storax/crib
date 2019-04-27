@@ -141,7 +141,7 @@ def to_prop(data):
 
     d = {k: conversions.get(k, identity)(data[k]) for k in keys}
 
-    return Property(d)
+    return Property.fromdict(d)
 
 
 def _to_dt(string: str) -> datetime.datetime:

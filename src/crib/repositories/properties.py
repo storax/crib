@@ -39,6 +39,10 @@ class PropertyRepo(plugins.Plugin):
         pass
 
     @abc.abstractmethod
+    def delete_all(self) -> None:
+        pass
+
+    @abc.abstractmethod
     def count(self) -> int:
         pass
 
@@ -49,14 +53,14 @@ class MemoryPropertyRepo(PropertyRepo):
         self._storage: Dict[str, Property] = {}
 
     def insert(self, prop: Property) -> None:
-        if prop["id"] in self._storage:
+        if prop.id in self._storage:
             raise exceptions.DuplicateProperty(prop)
-        self._storage[prop["id"]] = prop
+        self._storage[prop.id] = prop
 
     def update(self, prop: Property) -> None:
-        if prop["id"] not in self._storage:
-            raise exceptions.EntityNotFound(prop["id"])
-        self._storage[prop["id"]] = prop
+        if prop.id not in self._storage:
+            raise exceptions.EntityNotFound(prop.id)
+        self._storage[prop.id] = prop
 
     def exists(self, identity: str) -> bool:
         return identity in self._storage
@@ -77,6 +81,9 @@ class MemoryPropertyRepo(PropertyRepo):
         except KeyError:
             raise exceptions.EntityNotFound(identity)
 
+    def delete_all(self) -> None:
+        self._storage = {}
+
     def count(self) -> int:
         return len(self._storage)
 
@@ -88,25 +95,25 @@ class MongoPropertyRepo(PropertyRepo, mongo.MongoRepo):
 
     def _to_prop(self, data: Dict[str, Any]) -> Property:
         data.pop("_id")
-        return Property(data)
+        return Property.fromdict(data)
 
     def exists(self, identity: str) -> bool:
         return bool(self._props.find_one({"_id": identity}))
 
     def insert(self, prop: Property) -> None:
-        p = dict(prop)
-        p["_id"] = p["id"]
+        p = prop.asdict()
+        p["_id"] = prop.id
         try:
             self._props.insert_one(p)
         except pymongo.errors.DuplicateKeyError:
             raise exceptions.DuplicateProperty(p)
 
     def update(self, prop: Property) -> None:
-        p = dict(prop)
-        p["_id"] = p["id"]
-        result = self._props.replace_one({"_id": p["_id"]}, p)
+        p = prop.asdict()
+        p["_id"] = prop.id
+        result = self._props.replace_one({"_id": prop.id}, p)
         if result.matched_count == 0:
-            raise exceptions.EntityNotFound(p["id"])
+            raise exceptions.EntityNotFound(prop.id)
         assert result.matched_count == 1, "Duplicate IDs"
 
     def get(self, identity: str) -> Property:
@@ -123,7 +130,11 @@ class MongoPropertyRepo(PropertyRepo, mongo.MongoRepo):
 
     def find(self, order_by=(), limit=1000) -> Iterable[Property]:
         queried_props = self._props.find(
-            {"propertyImages.3": {"$exists": True}, "banned": {"$ne": True}}
+            {
+                "propertyImages.3": {"$exists": True},
+                "banned": {"$ne": True},
+                "students": {"$ne": True},
+            }
         )
         if order_by:
             order_by = [(field, self._to_order(i)) for field, i in order_by]
@@ -149,6 +160,9 @@ class MongoPropertyRepo(PropertyRepo, mongo.MongoRepo):
         result = self._props.delete_one({"_id": identity})
         if result.deleted_count == 0:
             raise exceptions.EntityNotFound(identity)
+
+    def delete_all(self) -> None:
+        self._props.delete_many({})
 
     def count(self) -> int:
         return self._props.count()

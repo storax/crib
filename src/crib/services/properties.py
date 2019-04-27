@@ -3,7 +3,6 @@ from typing import Dict
 
 from crib import exceptions, injection, plugins
 from crib.domain.direction import Location
-from crib.domain.property import Property
 
 log = logging.getLogger(__name__)
 

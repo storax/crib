@@ -1,6 +1,8 @@
 """
 Crib application
 """
+from typing import IO, Optional
+
 from crib import injection
 from crib.config import LoadedConfiguration
 from crib.plugin_loader import ConfiguredPluginProvider, PluginsProvider, hook
@@ -10,7 +12,7 @@ from crib.services.properties import PropertyService
 
 
 class AppContainer(injection.Container):
-    config_file = None
+    config_file: Optional[injection.ObjectProvider] = None
     config = injection.SingletonProvider(LoadedConfiguration)
     config_loaders = PluginsProvider(hook.crib_add_config_loaders)
     directions_service = ConfiguredPluginProvider(hook.crib_add_directions_services)

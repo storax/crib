@@ -1,32 +1,43 @@
 """
 Property model
 """
-from crib.domain.model import Model, SchemaType
-from crib.validation import vbool, vdict, vdt, vfloat, vint, vlist, vstr
+from datetime import datetime
+from typing import Dict, Optional, Tuple
+
+import attr
+
+from crib.domain.direction import Direction, Location
+from crib.domain.model import Model
 
 
+@attr.s(frozen=True)
+class Price:
+    amount: int = attr.ib()
+    currencyCode: str = attr.ib()
+    frequency: str = attr.ib()
+
+
+@attr.s(frozen=True)
 class Property(Model):
-    schema: SchemaType = {
-        "bedrooms": vint(),
-        "displayAddress": vstr(),
-        "featuredProperty": vbool(0),
-        "feesApply": vbool(),
-        "feesApplyText": vstr(0),
-        "firstVisibleDate": vdt(),
-        "id": vstr(),
-        "location": vdict({"latitude": vfloat(), "longitude": vfloat()}),
-        "price": vdict({"amount": vint(), "currencyCode": vstr(), "frequency": vstr()}),
-        "propertyImages": vlist(vstr(False)),
-        "floorplanImages": vlist(vstr(False)),
-        "propertySubType": vstr(),
-        "propertyTypeFullDescription": vstr(),
-        "propertyUrl": vstr(),
-        "students": vbool(),
-        "summary": vstr(),
-        "transactionType": vstr(),
-        "keyFeatures": vlist(vstr(False)),
-        "lettingInformation": {"type": "dict", "required": True},
-        "toWork": {"type": "dict", "default_setter": lambda doc: {}},
-        "favorite": {"type": "boolean", "default": False},
-        "banned": {"type": "boolean", "default": False},
-    }
+    bedrooms: int = attr.ib()
+    displayAddress: str = attr.ib()
+    feesApply: bool = attr.ib()
+    firstVisibleDate: datetime = attr.ib()
+    id: str = attr.ib()
+    location: Location = attr.ib()
+    price: Price = attr.ib()
+    propertyImages: Tuple[str, ...] = attr.ib()
+    floorplanImages: Tuple[str, ...] = attr.ib()
+    propertySubType: str = attr.ib()
+    propertyTypeFullDescription: str = attr.ib()
+    propertyUrl: str = attr.ib()
+    students: bool = attr.ib()
+    summary: str = attr.ib()
+    transactionType: str = attr.ib()
+    keyFeatures: Tuple[str, ...] = attr.ib()
+    lettingInformation: Dict = attr.ib()
+    feesApplyText: str = attr.ib(default="")
+    featuredProperty: bool = attr.ib(default=False)
+    toWork: Optional[Direction] = attr.ib(default=None)
+    favorite: bool = attr.ib(default=False)
+    banned: bool = attr.ib(default=False)

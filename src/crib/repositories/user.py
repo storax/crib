@@ -39,9 +39,9 @@ class MemoryPropertyRepo(UserRepo):
             raise exceptions.EntityNotFound(username)
 
     def add_user(self, user: User) -> None:
-        if user["username"] in self._storage:
+        if user.username in self._storage:
             raise exceptions.DuplicateProperty(user)
-        self._storage[user["username"]] = user
+        self._storage[user.username] = user
 
     def exists(self, username: str) -> bool:
         return username in self._storage
@@ -54,7 +54,7 @@ class MongoUserRepo(UserRepo, mongo.MongoRepo):
 
     def _to_user(self, data: Dict[str, Any]) -> User:
         data.pop("_id")
-        return User(**data)
+        return User.fromdict(data)
 
     def exists(self, username: str) -> bool:
         return bool(self._users.find_one({"username": username}))
@@ -67,8 +67,8 @@ class MongoUserRepo(UserRepo, mongo.MongoRepo):
         return user
 
     def add_user(self, user: User) -> None:
-        u = dict(user)
-        u["_id"] = user["username"]
+        u = user.asdict()
+        u["_id"] = user.username
         try:
             self._users.insert_one(u)
         except pymongo.errors.DuplicateKeyError:

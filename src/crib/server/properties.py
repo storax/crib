@@ -1,5 +1,5 @@
 """
-Property data
+Property endpoints
 """
 from flask import Blueprint, current_app, jsonify, request  # type: ignore
 from flask_jwt_extended import jwt_required  # type: ignore
@@ -17,7 +17,7 @@ def find():
     order_by = json.get("order_by", {})
     try:
         props = [
-            dict(p)
+            p.asdict()
             for p in current_app.property_service.find(order_by=order_by, limit=limit)
         ]
     except ValueError as err:
