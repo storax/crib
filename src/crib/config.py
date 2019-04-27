@@ -85,11 +85,10 @@ def _merge_config(default: Dict, override: Dict) -> Dict:
     return config
 
 
-class LoadedConfiguration(injection.Component):
-    """Configuration which is loaded through a config loader component.
+class DefaultConfiguration(injection.Component):
+    """Default configuration of crib.
     """
 
-    config_file = injection.Dependency()
     config_loaders = injection.Dependency()
 
     def __init__(self, name, container):
@@ -103,9 +102,32 @@ class LoadedConfiguration(injection.Component):
 
     def load(self):
         default = _load_default(self.config_loaders)
-        user_cfg = _load(self.config_loaders, self.config_file)
+        user_cfg = self.load_usercfg()
         cfg = _merge_config(default, user_cfg)
         return cfg
+
+    def load_usercfg(self):
+        return {}
+
+
+class LoadedConfiguration(DefaultConfiguration):
+    """Configuration which is loaded through a config loader component.
+    """
+
+    config_file = injection.Dependency()
+
+    def load_usercfg(self):
+        return _load(self.config_loaders, self.config_file)
+
+
+class MemoryConfiguration(injection.Component):
+    """Canned config which is merged with the default config.
+    """
+
+    config_overrides = injection.Dependency()
+
+    def load_usercfg(self):
+        return self.config_overrides
 
 
 @crib.hookimpl

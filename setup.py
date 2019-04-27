@@ -65,6 +65,7 @@ setup(
     ],
     tests_require=[
         "pytest",
+        "pytest-cov",
         "pytest-black",
         "pytest-flake8",
         "pytest-isort",

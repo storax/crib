@@ -63,7 +63,7 @@ class AbstractProvider(metaclass=abc.ABCMeta):
         self.feature = name
 
     @abc.abstractmethod
-    def __get__(self, container: Container, T) -> Any:
+    def __get__(self, container: Container, T) -> Any:  # pragma: no cover
         """Return a component for the requested feature."""
         raise NotImplementedError()
 
