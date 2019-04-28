@@ -46,10 +46,6 @@ class InvalidQuery(Exception):
     pass
 
 
-class UnknownOrder(InvalidQuery):
-    pass
-
-
 class DirectionsError(Exception):
     pass
 

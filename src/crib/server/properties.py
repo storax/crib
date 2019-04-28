@@ -13,12 +13,12 @@ bp = Blueprint("properties", __name__, url_prefix="/properties")
 @jwt_required
 def find():
     json = request.json
-    limit = json.get("limit", 100)
-    order_by = json.get("order_by", {})
+    limit = json.get("limit")
+    max_price = json.get("max_price")
     try:
         props = [
             p.asdict()
-            for p in current_app.property_service.find(order_by=order_by, limit=limit)
+            for p in current_app.property_service.find(max_price=max_price, limit=limit)
         ]
     except ValueError as err:
         return jsonify({"msg": str(err)}), 400

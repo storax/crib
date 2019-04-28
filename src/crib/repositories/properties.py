@@ -2,6 +2,7 @@
 Simple crud repository base class
 """
 import abc
+import itertools
 from typing import Any, Dict, Iterable, Type, TypeVar
 
 import pymongo  # type: ignore
@@ -44,6 +45,10 @@ class PropertyRepo(plugins.Plugin):
 
     @abc.abstractmethod
     def count(self) -> int:
+        pass
+
+    @abc.abstractmethod
+    def find(self, max_price=None, limit=None) -> Iterable[Property]:
         pass
 
 
@@ -94,6 +99,14 @@ class MemoryPropertyRepo(PropertyRepo):
     def count(self) -> int:
         return len(self._storage)
 
+    def find(self, max_price=None, limit=None) -> Iterable[Property]:
+        limit = limit or 1000
+        max_price = max_price or 1450
+
+        props = (p for p in self._storage.values() if p.price.amount <= max_price)
+        itertools.islice(props, limit)
+        return itertools
+
 
 class MongoPropertyRepo(PropertyRepo, mongo.MongoRepo):
     @property
@@ -135,34 +148,23 @@ class MongoPropertyRepo(PropertyRepo, mongo.MongoRepo):
         for data in self._props.find():
             yield self._to_prop(data)
 
-    def find(self, order_by=(), limit=1000) -> Iterable[Property]:
+    def find(self, max_price=None, limit=None) -> Iterable[Property]:
+        max_price = max_price or 1450
+        limit = limit or 1000
         queried_props = self._props.find(
             {
                 "propertyImages.3": {"$exists": True},
                 "banned": {"$ne": True},
                 "students": {"$ne": True},
-                "price.amount": {"$lt": 1420},
+                "price.amount": {"$lte": max_price},
             }
         )
-        if order_by:
-            order_by = [(field, self._to_order(i)) for field, i in order_by]
-            queried_props = queried_props.sort(order_by)
-        if limit:
-            queried_props = queried_props.limit(limit)
+        order_by = [("firstVisibleDate", pymongo.DESCENDING)]
+        queried_props = queried_props.sort(order_by)
+        queried_props = queried_props.limit(limit)
 
         for data in queried_props:
             yield self._to_prop(data)
-
-    @staticmethod
-    def _to_order(x):
-        if x == 1:
-            return pymongo.ASCENDING
-        elif x == -1:
-            return pymongo.DESCENDING
-        else:
-            raise exceptions.UnknownOrder(
-                "Order has to be either 1 for ascending or -1 for descending."
-            )
 
     def delete(self, identity: str) -> None:
         result = self._props.delete_one({"_id": identity})
@@ -170,7 +172,7 @@ class MongoPropertyRepo(PropertyRepo, mongo.MongoRepo):
             raise exceptions.EntityNotFound(identity)
 
     def clear(self, banned=False, favorites=False) -> None:
-        qfilter = {}
+        qfilter: Dict = {}
         if not banned:
             expressions = qfilter.setdefault("$and", [])
             expressions.append({"banned": {"$ne": True}})
