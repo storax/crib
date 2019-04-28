@@ -39,7 +39,7 @@ class PropertyRepo(plugins.Plugin):
         pass
 
     @abc.abstractmethod
-    def delete_all(self) -> None:
+    def clear(self, banned=False, favorites=False) -> None:
         pass
 
     @abc.abstractmethod
@@ -81,8 +81,15 @@ class MemoryPropertyRepo(PropertyRepo):
         except KeyError:
             raise exceptions.EntityNotFound(identity)
 
-    def delete_all(self) -> None:
-        self._storage = {}
+    def clear(self, banned=False, favorites=False) -> None:
+        if banned and favorites:
+            self._storage = {}
+
+        self._storage = {
+            k: v
+            for k, v in self._storage.items()
+            if not ((banned and v.banned) or (favorites and v.favorite))
+        }
 
     def count(self) -> int:
         return len(self._storage)
@@ -134,6 +141,7 @@ class MongoPropertyRepo(PropertyRepo, mongo.MongoRepo):
                 "propertyImages.3": {"$exists": True},
                 "banned": {"$ne": True},
                 "students": {"$ne": True},
+                "price.amount": {"$lt": 1420},
             }
         )
         if order_by:
@@ -161,8 +169,15 @@ class MongoPropertyRepo(PropertyRepo, mongo.MongoRepo):
         if result.deleted_count == 0:
             raise exceptions.EntityNotFound(identity)
 
-    def delete_all(self) -> None:
-        self._props.delete_many({})
+    def clear(self, banned=False, favorites=False) -> None:
+        qfilter = {}
+        if not banned:
+            expressions = qfilter.setdefault("$and", [])
+            expressions.append({"banned": {"$ne": True}})
+        if not favorites:
+            expressions = qfilter.setdefault("$and", [])
+            expressions.append({"favorite": {"$ne": True}})
+        self._props.delete_many(qfilter)
 
     def count(self) -> int:
         return self._props.count()

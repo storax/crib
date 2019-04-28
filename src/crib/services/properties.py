@@ -45,3 +45,6 @@ class PropertyService(plugins.Plugin):
         if prop.banned != val:
             prop = prop.replace(banned=val)
             self.property_repository.update(prop)
+
+    def clear_properties(self, banned=False, favorites=False):
+        self.property_repository.clear(banned=banned, favorites=favorites)

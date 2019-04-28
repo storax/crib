@@ -117,7 +117,8 @@ class LoadedConfiguration(DefaultConfiguration):
     config_file = injection.Dependency()
 
     def load_usercfg(self):
-        return _load(self.config_loaders, self.config_file)
+        with open(self.config_file, "r") as fp:
+            return _load(self.config_loaders, fp)
 
 
 class MemoryConfiguration(DefaultConfiguration):

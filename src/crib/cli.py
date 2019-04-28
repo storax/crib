@@ -20,9 +20,9 @@ click_log.basic_config(_log)
 
 @click.group()
 @click_log.simple_verbosity_option(_log)
-@click.option("-c", "--config", type=click.File(), help="Yaml config file")
+@click.option("-c", "--config", type=click.Path(exists=True), help="Yaml config file")
 @click.pass_context
-def main(ctx: click.Context, config: IO[str]) -> None:
+def main(ctx: click.Context, config: str) -> None:
     """Find the best properties with crib!"""
 
     config_file_provider = injection.ObjectProvider(config)
@@ -79,11 +79,12 @@ def browse(obj) -> None:
 
 
 @main.command()
+@click.option("--banned", is_flag=True, help="Delete banned properties.")
+@click.option("--favorite", is_flag=True, help="Delete favorite properties.")
 @click.pass_obj
-def clear_properties(obj) -> None:
+def clear_properties(obj, banned, favorite) -> None:
     """Delete all properties."""
-    repo = obj.property_repository
-    repo.delete_all()
+    obj.property_service.clear_properties(banned, favorite)
 
 
 def create_app_wrapper(*args, **kwargs):
