@@ -8,7 +8,7 @@ import scrapy  # type: ignore
 from scrapy.http.response import Response  # type: ignore
 
 from crib import injection
-from crib.domain.property import Property
+from crib.domain import Property
 from crib.scraper import base
 from crib.scraper.items import PropertyItem
 

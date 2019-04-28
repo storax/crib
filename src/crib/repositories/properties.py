@@ -8,7 +8,7 @@ import pymongo  # type: ignore
 
 import crib
 from crib import exceptions, plugins
-from crib.domain.property import Property
+from crib.domain import Property
 
 from . import mongo
 

@@ -21,4 +21,4 @@ def testapp():
             "user_repository": {"type": "MemoryUserRepo"},
             "directions_repository": {"type": "MemoryDirectionsRepo"},
         }
-    )
+    )()

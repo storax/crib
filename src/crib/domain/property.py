@@ -6,8 +6,8 @@ from typing import Dict, Optional, Tuple
 
 import attr
 
-from crib.domain.direction import Direction, Location
-from crib.domain.model import Model
+from . import Direction, Location
+from .model import Model
 
 
 @attr.s(frozen=True)

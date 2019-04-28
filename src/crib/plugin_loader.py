@@ -1,3 +1,4 @@
+import weakref
 from typing import List, Type, TypeVar
 
 import pluggy  # type: ignore
@@ -23,7 +24,7 @@ TDS = Type[DS]
 
 class CribSpec:
     @hookspec
-    def crib_add_property_repos(self) -> List[TPR]:
+    def crib_add_property_repos(self) -> List[TPR]:  # pragma: no cover
         """Add property repo plugins
 
         :return: a list of PropertyRepos
@@ -31,7 +32,7 @@ class CribSpec:
         return []
 
     @hookspec
-    def crib_add_user_repos(self) -> List[TUR]:
+    def crib_add_user_repos(self) -> List[TUR]:  # pragma: no cover
         """Add user repo plugins
 
         :return: a list of UserRepos
@@ -39,7 +40,7 @@ class CribSpec:
         return []
 
     @hookspec
-    def crib_add_directions_repos(self) -> List[TDR]:
+    def crib_add_directions_repos(self) -> List[TDR]:  # pragma: no cover
         """Add directions repo plugins
 
         :return: a list of DirectionsRepos
@@ -47,7 +48,9 @@ class CribSpec:
         return []
 
     @hookspec
-    def crib_add_config_loaders(self) -> List[config.AbstractConfigLoader]:
+    def crib_add_config_loaders(
+        self
+    ) -> List[config.AbstractConfigLoader]:  # pragma: no cover
         """Add config loaders
 
         :return: a list of AbstractConfigLoader
@@ -55,10 +58,11 @@ class CribSpec:
         return []
 
     @hookspec
-    def crib_add_directions_services(self) -> List[TDS]:
+    def crib_add_directions_services(self) -> List[TDS]:  # pragma: no cover
         """Add DirectionsServices
 
         :return: a list of DirectionsService
+
         """
         return []
 
@@ -86,12 +90,15 @@ class PluginsProvider(AbstractProvider):
     def __init__(self, hook):
         super().__init__()
         self._hook = hook
-        self._plugins = None
+        self._plugins = weakref.WeakKeyDictionary()
 
     def __get__(self, container: Container, T) -> List:
-        if self._plugins is None:
-            self._plugins = self._load_plugins()
-        return self._plugins
+        if container is None:
+            return self
+
+        if container not in self._plugins:
+            self._plugins[container] = self._load_plugins()
+        return self._plugins[container]
 
     def _load_plugins(self) -> List:
         plugins = [plugin for plugins in self._hook() for plugin in plugins]
@@ -106,13 +113,16 @@ class ConfiguredPluginProvider(AbstractProvider):
 
     def __init__(self, hook):
         self._plugins_provider = PluginsProvider(hook)
-        self._component = None
+        self._components = weakref.WeakKeyDictionary()
 
     def __get__(self, container: Container, T) -> plugins.PluginComponent:
-        if self._component is None:
+        if container is None:
+            return self
+
+        if container not in self._components:
             plugins = self._plugins_provider.__get__(container, T)
-            self._component = self._load_component(container, plugins)
-        return self._component
+            self._components[container] = self._load_component(container, plugins)
+        return self._components[container]
 
     def _load_component(self, container, plugins) -> plugins.PluginComponent:
         plugin_config = container.config[self.feature]

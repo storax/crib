@@ -1,20 +1,11 @@
 property_repository:
-  type: MongoPropertyRepo
-  connection:
-    host: 'localhost:27017'
-  database: "crib"
+  type: MemoryPropertyRepo
 
 user_repository:
-  type: MongoUserRepo
-  connection:
-    host: 'localhost:27017'
-  database: "crib"
+  type: MemoryUserRepo
 
 directions_repository:
-  type: MongoDirectionsRepo
-  connection:
-    host: 'localhost:27017'
-  database: "crib"
+  type: MemoryDirectionsRepo
 
 directions_service:
   type: GoogleDirections

@@ -14,7 +14,7 @@ from matplotlib.colors import rgb2hex  # type: ignore
 
 import crib
 from crib import exceptions, injection, plugins
-from crib.domain.direction import Direction, Location
+from crib.domain import Direction, Location
 
 log = logging.getLogger(__name__)
 

@@ -120,7 +120,7 @@ class LoadedConfiguration(DefaultConfiguration):
         return _load(self.config_loaders, self.config_file)
 
 
-class MemoryConfiguration(injection.Component):
+class MemoryConfiguration(DefaultConfiguration):
     """Canned config which is merged with the default config.
     """
 

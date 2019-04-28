@@ -4,7 +4,7 @@ User model
 import attr
 from werkzeug.security import check_password_hash  # type: ignore
 
-from crib.domain.model import Model
+from .model import Model
 
 
 def _cred_validator(instance, attribute: attr.Attribute, value: str) -> None:

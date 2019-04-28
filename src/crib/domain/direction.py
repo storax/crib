@@ -5,7 +5,7 @@ from typing import Dict, Optional, Tuple
 
 import attr
 
-from crib.domain.model import Model
+from .model import Model
 
 
 @attr.s(frozen=True)

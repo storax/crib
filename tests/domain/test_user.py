@@ -3,7 +3,7 @@ import attr
 import pytest  # type: ignore
 from werkzeug.security import generate_password_hash  # type: ignore
 
-from crib.domain.user import User
+from crib.domain import User
 
 
 @pytest.fixture

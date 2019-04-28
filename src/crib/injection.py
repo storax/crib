@@ -31,6 +31,7 @@ when a component accesses a dependency. The dependency injection is lazy::
 
 """
 import abc
+import weakref
 from typing import Any, Type, TypeVar, Union
 
 from crib.exceptions import InjectionError
@@ -76,6 +77,9 @@ class FactoryProvider(AbstractProvider):
         self._kwargs = kwargs
 
     def __get__(self, container: Container, T) -> Component:
+        if container is None:
+            return self
+
         return self._component_class(
             self.feature, container, *self._args, **self._kwargs
         )
@@ -84,11 +88,15 @@ class FactoryProvider(AbstractProvider):
 class SingletonProvider(FactoryProvider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._instance = None
+        self._instances = weakref.WeakKeyDictionary()
 
     def __get__(self, container: Container, T) -> Component:
-        self._instance = self._instance or super().__get__(container, T)
-        return self._instance
+        if container is None:
+            return self
+
+        if container not in self._instances:
+            self._instances[container] = super().__get__(container, T)
+        return self._instances[container]
 
 
 class ObjectProvider(AbstractProvider):
