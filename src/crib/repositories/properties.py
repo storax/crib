@@ -104,8 +104,7 @@ class MemoryPropertyRepo(PropertyRepo):
         max_price = max_price or 1450
 
         props = (p for p in self._storage.values() if p.price.amount <= max_price)
-        itertools.islice(props, limit)
-        return itertools
+        return itertools.islice(props, limit)
 
 
 class MongoPropertyRepo(PropertyRepo, mongo.MongoRepo):
