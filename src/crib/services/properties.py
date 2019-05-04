@@ -20,7 +20,7 @@ class PropertyService(plugins.Plugin):
 
         return props
 
-    def to_work(self, prop_id: str, mode: str, refresh: bool = False):
+    async def to_work(self, prop_id: str, mode: str, refresh: bool = False):
         prop = self.property_repository.get(prop_id)
 
         if prop.toWork and not refresh:
@@ -28,7 +28,7 @@ class PropertyService(plugins.Plugin):
 
         origin = prop.location
 
-        route = self.directions_service.to_work(origin, mode)
+        route = await self.directions_service.to_work(origin, mode)
 
         prop = prop.replace(toWork=route)
         self.property_repository.update(prop)

@@ -1,5 +1,6 @@
 import logging
 
+import quart.flask_patch
 from flask_jwt_extended import create_access_token, create_refresh_token  # type: ignore
 from werkzeug.security import generate_password_hash  # type: ignore
 

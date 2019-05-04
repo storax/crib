@@ -3,15 +3,16 @@ Server for crib.
 """
 import os
 
-import flask  # type: ignore
-from flask_cors import CORS  # type: ignore
+import quart.flask_patch
+from quart import Quart
+from quart_cors import cors  # type: ignore
 
 from crib import injection
 
 from . import auth, directions, properties
 
 
-class Flask(injection.Component, flask.Flask):
+class Flask(injection.Component, Quart):
     _crib_config = injection.Infrastructure("config")
     user_repository = injection.Dependency()
     property_repository = injection.Dependency()
@@ -19,6 +20,18 @@ class Flask(injection.Component, flask.Flask):
     directions_repository = injection.Dependency()
     property_service = injection.Dependency()
     auth_service = injection.Dependency()
+
+    def __init__(self, *args, **kwargs):
+        self._name = None
+        super(Flask, self).__init__(*args, **kwargs)
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
 
 
 def create_app(container):
@@ -29,7 +42,7 @@ def create_app(container):
         JWT_BLACKLIST_ENABLED=True,
         JWT_BLACKLIST_TOKEN_CHECKS=["access", "refresh"],
     )
-    CORS(app)
+    app = cors(app)
     app.config.from_mapping(app._crib_config)
 
     # ensure the instance folder exists

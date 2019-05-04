@@ -9,7 +9,7 @@ from typing import Any, Dict, Iterable, Type, TypeVar
 
 import cmocean  # type: ignore
 import numpy  # type: ignore
-import requests
+import requests_async as requests
 from matplotlib.colors import rgb2hex  # type: ignore
 
 import crib
@@ -58,13 +58,13 @@ class DirectionsService(plugins.Plugin):
         }
 
     @abc.abstractmethod
-    def to_work(self, origin: Location, mode: str) -> Dict:
+    async def to_work(self, origin: Location, mode: str) -> Dict:
         return {}
 
-    def fetch_map_to_work(self, mode: str) -> None:
+    async def fetch_map_to_work(self, mode: str) -> None:
         for i, ll in list(enumerate(self.raster_map())):
             log.info("Fetching #%s", i)
-            route = self.to_work(Location(**ll), mode)
+            route = await self.to_work(Location(**ll), mode)
             try:
                 d = Direction.fromdict(route)
             except Exception as err:
@@ -132,7 +132,7 @@ class GoogleDirections(DirectionsService):
         schema.update({"api-key": {"type": "string", "required": True}})
         return schema
 
-    def to_work(self, origin: Location, mode: str) -> Dict:
+    async def to_work(self, origin: Location, mode: str) -> Dict:
         log.info("Fetching route to work: %s, %s", origin.latitude, origin.longitude)
         key = self.config["api-key"]
         work = Location(**self.config["work-location"])
@@ -143,7 +143,7 @@ class GoogleDirections(DirectionsService):
             "arrival_time": next_monday_morning(),
             "mode": mode,
         }
-        response = requests.get(self._URL, args)
+        response = await requests.get(self._URL, args)
         response.raise_for_status()
 
         data = response.json()

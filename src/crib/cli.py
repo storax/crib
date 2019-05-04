@@ -1,14 +1,14 @@
 """
 The CLI interface for crib.
 """
+import asyncio
 import code
 import logging
 from typing import IO
 
 import click
 import click_log  # type: ignore
-from flask import current_app  # type: ignore
-from flask.cli import FlaskGroup, ScriptInfo  # type: ignore
+from quart.cli import QuartGroup, ScriptInfo  # type: ignore
 
 from crib import app, exceptions, injection
 from crib.config import LoadedConfiguration
@@ -51,9 +51,9 @@ def crawl(obj, spider: str, loglevel: str) -> None:
     obj.scrape.crawl(spider, loglevel)
 
 
-@scrape.command()
+@scrape.command(name="list")
 @click.pass_obj
-def list(obj) -> None:
+def list_scapers(obj) -> None:
     """List all spiders.
     """
     for spider in obj.scrape.list_spiders():
@@ -94,18 +94,20 @@ def create_app_wrapper(*args, **kwargs):
 
 
 @main.group(
-    cls=FlaskGroup,
+    cls=QuartGroup,
     create_app=create_app_wrapper,
     context_settings={"obj": ScriptInfo(create_app=create_app_wrapper)},
 )
 def server():
     """Run the crib server."""
+    pass
 
 
 @server.command()
 @click.pass_context
 def run(ctx):
-    current_app.run()
+    app = ctx.ensure_object(ScriptInfo).load_app()
+    app.run(debug=True)
 
 
 @server.command()
@@ -128,4 +130,5 @@ def add_user(ctx: click.Context, username: str, password: str) -> None:
 @click.argument("mode", type=click.Choice(["transit"]))
 @click.pass_context
 def fetch_to_work(ctx: click.Context, mode) -> None:
-    ctx.obj.directions_service.fetch_map_to_work(mode)
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(ctx.obj.directions_service.fetch_map_to_work(mode))

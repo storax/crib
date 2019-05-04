@@ -61,6 +61,9 @@ setup(
         "pluggy",
         "pymongo",
         "pyyaml",
+        "quart",
+        "quart_cors",
+        "requests_async",
         "scrapy",
     ],
     tests_require=[
