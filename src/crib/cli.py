@@ -4,7 +4,6 @@ The CLI interface for crib.
 import asyncio
 import code
 import logging
-from typing import IO
 
 import click
 import click_log  # type: ignore
@@ -76,6 +75,19 @@ def browse(obj) -> None:
     else:
         readline.parse_and_bind("tab: complete")
     _console.interact(banner="You can access the repository via the 'repo' variable.")
+
+
+@main.command()
+@click.option("--min-samples", type=int)
+@click.option("--leaf-size", type=int)
+@click.option("--eps", type=float)
+@click.option("--alpha", type=int)
+@click.pass_obj
+def get_area(obj, min_samples, leaf_size, eps, alpha) -> None:
+    """Cluster directions."""
+    obj.directions_service.get_area(
+        eps=eps, min_samples=min_samples, leaf_size=leaf_size, alpha=alpha
+    )
 
 
 @main.command()

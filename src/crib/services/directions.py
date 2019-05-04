@@ -14,7 +14,7 @@ from matplotlib.colors import rgb2hex  # type: ignore
 
 import crib
 from crib import exceptions, injection, plugins
-from crib.domain import Direction, Location
+from crib.domain import Direction, Location, map_analysis
 
 log = logging.getLogger(__name__)
 
@@ -121,6 +121,14 @@ class DirectionsService(plugins.Plugin):
         rgb_values = colormap(numpy.arange(delta))[:, :-1]
         hex_values = [rgb2hex(rgb) for rgb in rgb_values]
         return hex_values
+
+    def get_area(self, eps=None, min_samples=None, leaf_size=None, alpha=None):
+        directions = [
+            d["location"]
+            for d in self.directions_repository.get_to_work_durations()
+            if d["durationValue"] <= 60 * 42
+        ]
+        map_analysis.get_area(directions, eps, min_samples, leaf_size, alpha)
 
 
 class GoogleDirections(DirectionsService):
