@@ -1,10 +1,7 @@
 """Tests for the property model.
 """
-import json
-import pathlib
-
 import attr
-import pytest
+import pytest  # type: ignore
 
 from crib.domain import Property
 

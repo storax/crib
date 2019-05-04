@@ -2,7 +2,7 @@
 """
 import gc
 
-import pytest
+import pytest  # type: ignore
 
 from crib import exceptions
 from crib.plugin_loader import PluginsProvider
@@ -24,7 +24,7 @@ def test_plugin_not_found():
     testapp = make_app({"property_repository": {"type": "ThisPluginDoesNotExist"}})()
 
     with pytest.raises(exceptions.PluginNotFound):
-        repo = testapp.property_repository
+        testapp.property_repository
 
 
 def test_plugins_provider_uninitialized():
@@ -56,7 +56,7 @@ def test_plugins_provider_cache_weakref(testapp):
     """
     container = make_app()
     testapp2 = container()
-    plugins = testapp2.config_loaders
+    testapp2.config_loaders
     gc.collect()
     assert testapp2 in container.config_loaders._plugins
     assert len(container.config_loaders._plugins.keyrefs()) == 2

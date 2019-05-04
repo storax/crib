@@ -1,11 +1,9 @@
-import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib.cm import ScalarMappable
-from matplotlib.colors import Normalize
-from scipy.spatial import Delaunay
-from shapely import geometry
-from shapely.ops import cascaded_union, polygonize
-from sklearn.cluster import DBSCAN
+import geopandas  # type: ignore
+import numpy as np  # type: ignore
+from scipy.spatial import Delaunay  # type: ignore
+from shapely import geometry  # type: ignore
+from shapely.ops import cascaded_union, polygonize  # type: ignore
+from sklearn.cluster import DBSCAN  # type: ignore
 
 
 def get_area(directions, eps=None, min_samples=None, leaf_size=None, alpha=None):
@@ -19,29 +17,10 @@ def get_area(directions, eps=None, min_samples=None, leaf_size=None, alpha=None)
     clusters = get_clusters(
         directions, eps=eps, min_samples=min_samples, leaf_size=leaf_size
     )
-    norm = Normalize(0, len(clusters) - 1)
-    sc = ScalarMappable(norm)
-    for i, cluster in enumerate(clusters):
-        p = plt.scatter(
-            cluster[:, 0], cluster[:, 1], c=[sc.to_rgba(i)[:3]], alpha=0.33333
-        )
-
-    print(len(clusters))
 
     polys = [alpha_shape(m, alpha) for m in clusters]
     polys = [p for p in polys if p and p.geometryType() == "Polygon"]
-    [
-        plt.plot(
-            *poly.buffer(0.002).exterior.xy,
-            color="#6699cc",
-            alpha=0.7,
-            linewidth=3,
-            solid_capstyle="round",
-            zorder=2,
-        )
-        for poly in polys
-    ]
-    plt.show(p)
+    return geopandas.GeoSeries(polys).to_json()
 
 
 def get_clusters(directions, *args, **kwargs):
@@ -70,15 +49,15 @@ def alpha_shape(points, alpha):
     triangles = points[tri.vertices]
     a = (
         (triangles[:, 0, 0] - triangles[:, 1, 0]) ** 2
-        + (triangles[:, 0, 1] - triangles[:, 1, 1]) ** 2
+        + (triangles[:, 0, 1] - triangles[:, 1, 1]) ** 2  # noqa: W503
     ) ** 0.5
     b = (
         (triangles[:, 1, 0] - triangles[:, 2, 0]) ** 2
-        + (triangles[:, 1, 1] - triangles[:, 2, 1]) ** 2
+        + (triangles[:, 1, 1] - triangles[:, 2, 1]) ** 2  # noqa: W503
     ) ** 0.5
     c = (
         (triangles[:, 2, 0] - triangles[:, 0, 0]) ** 2
-        + (triangles[:, 2, 1] - triangles[:, 0, 1]) ** 2
+        + (triangles[:, 2, 1] - triangles[:, 0, 1]) ** 2  # noqa: W503
     ) ** 0.5
     s = (a + b + c) / 2.0
     areas = (s * (s - a) * (s - b) * (s - c)) ** 0.5

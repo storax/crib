@@ -2,7 +2,7 @@
 """
 from typing import Any, Dict
 
-import pytest
+import pytest  # type: ignore
 
 from crib import exceptions, injection
 from crib.plugins import Plugin

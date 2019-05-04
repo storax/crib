@@ -9,7 +9,7 @@ from typing import Any, Dict, Iterable, Type, TypeVar
 
 import cmocean  # type: ignore
 import numpy  # type: ignore
-import requests_async as requests
+import requests_async as requests  # type: ignore
 from matplotlib.colors import rgb2hex  # type: ignore
 
 import crib
@@ -128,7 +128,7 @@ class DirectionsService(plugins.Plugin):
             for d in self.directions_repository.get_to_work_durations()
             if d["durationValue"] <= 60 * 42
         ]
-        map_analysis.get_area(directions, eps, min_samples, leaf_size, alpha)
+        return map_analysis.get_area(directions, eps, min_samples, leaf_size, alpha)
 
 
 class GoogleDirections(DirectionsService):

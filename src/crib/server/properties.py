@@ -9,7 +9,7 @@ from crib import exceptions
 bp = Blueprint("properties", __name__, url_prefix="/properties")
 
 
-@bp.route("/find", methods=("POST",))
+@bp.route("/find", methods=["POST"])
 async def find():
     json = await request.json
     limit = json.get("limit")
@@ -25,7 +25,7 @@ async def find():
     return jsonify(props)
 
 
-@bp.route("/to_work", methods=("GET",))
+@bp.route("/to_work", methods=["GET"])
 @jwt_required
 async def to_work():
     args = request.args
@@ -47,7 +47,7 @@ async def to_work():
     return jsonify(route)
 
 
-@bp.route("/favorite", methods=("PUT",))
+@bp.route("/favorite", methods=["PUT"])
 @jwt_required
 async def favorite():
     json = await request.json
@@ -66,7 +66,7 @@ async def favorite():
     return jsonify({"msg": "success"}), 200
 
 
-@bp.route("/ban", methods=("PUT",))
+@bp.route("/ban", methods=["PUT"])
 @jwt_required
 async def ban():
     json = await request.json

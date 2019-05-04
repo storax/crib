@@ -1,10 +1,7 @@
 """Tests for the direction model.
 """
-import json
-import pathlib
-
 import attr
-import pytest
+import pytest  # type: ignore
 
 from crib.domain import Direction
 

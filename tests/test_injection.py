@@ -1,7 +1,5 @@
 """Tests for the injection module.
 """
-import gc
-
 import pytest  # type: ignore
 
 from crib import exceptions, injection

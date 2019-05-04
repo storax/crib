@@ -3,7 +3,7 @@ Server for crib.
 """
 import os
 
-import quart.flask_patch
+import quart.flask_patch  # noqa: F401
 from quart import Quart
 from quart_cors import cors  # type: ignore
 

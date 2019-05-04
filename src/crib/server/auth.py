@@ -28,7 +28,7 @@ def check_if_token_in_blacklist(decrypted_token):
     return jti in blacklist
 
 
-@bp.route("/login", methods=("POST",))
+@bp.route("/login", methods=["POST"])
 async def login():
     if not request.is_json:
         return jsonify({"msg": "Missing JSON in request"}), 400
@@ -49,7 +49,7 @@ async def login():
     return jsonify(tokens), 200
 
 
-@bp.route("/refresh", methods=("POST",))
+@bp.route("/refresh", methods=["POST"])
 @jwt_refresh_token_required
 async def refresh():
     current_user = get_jwt_identity()
@@ -58,7 +58,7 @@ async def refresh():
 
 
 # Endpoint for revoking the current users access token
-@bp.route("/logout", methods=("DELETE",))
+@bp.route("/logout", methods=["DELETE"])
 @jwt_required
 async def logout():
     jti = get_raw_jwt()["jti"]
@@ -67,7 +67,7 @@ async def logout():
 
 
 # Endpoint for revoking the current users refresh token
-@bp.route("/logout2", methods=("DELETE",))
+@bp.route("/logout2", methods=["DELETE"])
 @jwt_refresh_token_required
 async def logout2():
     jti = get_raw_jwt()["jti"]

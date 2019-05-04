@@ -1,5 +1,4 @@
 import logging
-from typing import Dict
 
 from crib import exceptions, injection, plugins
 

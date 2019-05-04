@@ -10,21 +10,21 @@ bp = Blueprint("directions", __name__, url_prefix="/directions")
 log = logging.getLogger(__name__)
 
 
-@bp.route("/raster_map", methods=("GET",))
+@bp.route("/raster_map", methods=["GET"])
 @jwt_required
 async def raster_map():
     raster = list(current_app.directions_service.raster_map())
     return jsonify(raster)
 
 
-@bp.route("/colormaps", methods=("GET",))
+@bp.route("/colormaps", methods=["GET"])
 @jwt_required
 async def colormaps():
     maps = list(current_app.directions_service.colormaps())
     return jsonify(maps)
 
 
-@bp.route("/to_work_durations", methods=("GET",))
+@bp.route("/to_work_durations", methods=["GET"])
 @jwt_required
 async def to_work_durations():
     maxDuration = request.args.get("maxDuration", 3000, int)
@@ -36,3 +36,9 @@ async def to_work_durations():
         return jsonify(durations)
     except ValueError as err:
         return jsonify({"msg": str(err)}), 400
+
+
+@bp.route("/get_area", methods=["GET"])
+@jwt_required
+async def get_area():
+    return current_app.directions_service.get_area()

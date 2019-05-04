@@ -19,7 +19,12 @@ click_log.basic_config(_log)
 
 @click.group()
 @click_log.simple_verbosity_option(_log)
-@click.option("-c", "--config", type=click.Path(exists=True), help="Yaml config file")
+@click.option(
+    "-c",
+    "--config",
+    type=click.Path(exists=True, dir_okay=False),
+    help="Yaml config file",
+)
 @click.pass_context
 def main(ctx: click.Context, config: str) -> None:
     """Find the best properties with crib!"""
