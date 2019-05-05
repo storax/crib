@@ -128,7 +128,7 @@ class DirectionsService(plugins.Plugin):
 
     def get_area(self, eps=None, min_samples=None, leaf_size=None, alpha=None):
         directions = [
-            d["location"]
+            [d["location"][1], d["location"][0]]
             for d in self.directions_repository.get_to_work_durations()
             if d["durationValue"] <= 60 * 42
         ]
