@@ -53,6 +53,8 @@ class DirectionsService(plugins.Plugin):
                             "lng": {"type": "float", "required": True},
                         },
                     },
+                    "latsamples": {"type": "float", "required": True},
+                    "lngsamples": {"type": "float", "required": True},
                 },
             },
         }
@@ -75,10 +77,12 @@ class DirectionsService(plugins.Plugin):
     def raster_map(self) -> Iterable[Dict]:
         ne = self.config["search-area"]["northEast"]
         sw = self.config["search-area"]["southWest"]
+        latsamples = self.config["search-area"]["latsamples"]
+        lngsamples = self.config["search-area"]["lngsamples"]
         latdelta = ne["lat"] - sw["lat"]
         lngdelta = ne["lng"] - sw["lng"]
-        for lat in frange(sw["lat"], ne["lat"], latdelta / 100):
-            for lng in frange(sw["lng"], ne["lng"], lngdelta / 100):
+        for lat in frange(sw["lat"], ne["lat"], latdelta / latsamples):
+            for lng in frange(sw["lng"], ne["lng"], lngdelta / lngsamples):
                 yield {"latitude": lat, "longitude": lng}
 
     def to_work_durations(

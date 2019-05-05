@@ -20,6 +20,8 @@ directions_service:
     southWest:
       lat: 51.0
       lng: -0.03
+    latsamples: 100
+    lngsamples: 100
 
 scrape:
   # Scrapy settings for crib project

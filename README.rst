@@ -54,11 +54,19 @@ Start mongodb::
 Crib uses ``localhost:2717`` as default. The settings can be overridden in the config for crib::
 
   property_repository:
+    type: MongoPropertyRepo
     connection:
       host: 'localhost:27017'
     database: "crib"
   
   user_repository:
+    type: MongoUserRepo
+    connection:
+      host: 'localhost:27017'
+    database: "crib"
+  
+  directions_repository:
+    type: MongoDirectionsRepo
     connection:
       host: 'localhost:27017'
     database: "crib"
@@ -99,6 +107,20 @@ set it in the ``config.yaml``. You can also specify your place of work::
     work-location:
       latitude: 51.0
       longitude: 0.0
+  search-area:
+    northEast:
+      lat: 51.0
+      lng: 0.05
+    southWest:
+      lat: 51.5
+      lng: -0.3
+    latsamples: 100
+    lngsamples: 100
+
+The search area command is used to scrape a grid of routes to ``work-location``.
+Define the boundaries and samples in each direction and run::
+
+  crib -c config.yaml server fetch-to-work
 
 Setup user
 ++++++++++
