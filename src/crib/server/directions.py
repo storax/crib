@@ -41,4 +41,5 @@ async def to_work_durations():
 @bp.route("/get_area", methods=["GET"])
 @jwt_required
 async def get_area():
-    return current_app.directions_service.get_area()
+    seconds = request.args.get("maxDuration", 42 * 60, int)
+    return current_app.directions_service.get_area(seconds)

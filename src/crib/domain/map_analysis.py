@@ -7,6 +7,8 @@ from sklearn.cluster import DBSCAN  # type: ignore
 
 
 def get_area(directions, eps=None, min_samples=None, leaf_size=None, alpha=None):
+    if not directions:
+        return None
     eps = eps or 0.005
     min_samples = min_samples or 1
     leaf_size = leaf_size or 1
@@ -19,7 +21,7 @@ def get_area(directions, eps=None, min_samples=None, leaf_size=None, alpha=None)
     )
 
     polys = [alpha_shape(m, alpha) for m in clusters]
-    polys = [p for p in polys if p and p.geometryType() == "Polygon"]
+    polys = [p.buffer(0.0014) for p in polys if p and p.geometryType() == "Polygon"]
     return geopandas.GeoSeries(polys).to_json()
 
 
