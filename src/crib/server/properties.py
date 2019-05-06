@@ -3,6 +3,7 @@ Property endpoints
 """
 from flask_jwt_extended import jwt_required  # type: ignore
 from quart import Blueprint, current_app, jsonify, request  # type: ignore
+from shapely import geometry
 
 from crib import exceptions
 
@@ -14,14 +15,17 @@ async def find():
     json = await request.json
     limit = json.get("limit")
     max_price = json.get("max_price")
+    max_duration = json.get("max_duration")
+    area = current_app.directions_service.get_area(max_duration)
     try:
         props = [
             p.asdict()
             for p in current_app.property_service.find(max_price=max_price, limit=limit)
+            if area
+            and area.contains(geometry.Point(p.location.longitude, p.location.latitude))
         ]
     except ValueError as err:
         return jsonify({"msg": str(err)}), 400
-
     return jsonify(props)
 
 

@@ -18,7 +18,10 @@ def get_area(directions, alpha=None, hullbuffer=None):
     directions = np.array(directions)
 
     polys = alpha_shape(directions, alpha)
-    polys = unary_union([p.buffer(hullbuffer) for p in polys])
+    if polys.geom_type == "Polygon":
+        polys = polys.buffer(hullbuffer)
+    else:
+        polys = unary_union([p.buffer(hullbuffer) for p in polys])
     return polys
 
 
