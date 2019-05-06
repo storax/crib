@@ -126,15 +126,13 @@ class DirectionsService(plugins.Plugin):
         hex_values = [rgb2hex(rgb) for rgb in rgb_values]
         return hex_values
 
-    def get_area(
-        self, seconds=42 * 60, eps=None, min_samples=None, leaf_size=None, alpha=None
-    ):
+    def get_area(self, maxDuration=42 * 60, alpha=None, hullbuffer=None):
         directions = [
             [d["location"][1], d["location"][0]]
             for d in self.directions_repository.get_to_work_durations()
-            if d["durationValue"] <= seconds
+            if d["durationValue"] <= maxDuration
         ]
-        return map_analysis.get_area(directions, eps, min_samples, leaf_size, alpha)
+        return map_analysis.get_area(directions, alpha, hullbuffer)
 
 
 class GoogleDirections(DirectionsService):

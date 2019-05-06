@@ -41,5 +41,16 @@ async def to_work_durations():
 @bp.route("/get_area", methods=["GET"])
 @jwt_required
 async def get_area():
-    seconds = request.args.get("maxDuration", 42 * 60, int)
-    return current_app.directions_service.get_area(seconds)
+    maxDuration = request.args.get("maxDuration", 42 * 60)
+    alpha = request.args.get("alpha", None)
+    hullbuffer = request.args.get("hullbuffer", None)
+    try:
+        maxDuration = maxDuration and int(maxDuration)
+        alpha = alpha and int(alpha)
+        hullbuffer = hullbuffer and int(hullbuffer)
+    except (TypeError, ValueError):
+        return jsonify({"msg": "Invalid parameter"}), 400
+
+    return current_app.directions_service.get_area(
+        maxDuration=maxDuration, alpha=alpha, hullbuffer=hullbuffer
+    )

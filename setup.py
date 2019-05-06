@@ -68,7 +68,6 @@ setup(
         "scipy",
         "scrapy",
         "shapely",
-        "sklearn",
     ],
     tests_require=[
         "pytest",
