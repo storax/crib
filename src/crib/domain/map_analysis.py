@@ -1,6 +1,5 @@
 import math
 
-import geopandas  # type: ignore
 import numpy as np  # type: ignore
 from scipy.spatial import Delaunay  # type: ignore
 from shapely import geometry  # type: ignore
@@ -20,7 +19,7 @@ def get_area(directions, alpha=None, hullbuffer=None):
 
     polys = alpha_shape(directions, alpha)
     polys = unary_union([p.buffer(hullbuffer) for p in polys])
-    return geopandas.GeoSeries(polys).to_json()
+    return polys
 
 
 def alpha_shape(points, alpha):

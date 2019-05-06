@@ -3,6 +3,7 @@ Direction endpoints
 """
 import logging
 
+import geopandas  # type: ignore
 from flask_jwt_extended import jwt_required  # type: ignore
 from quart import Blueprint, current_app, jsonify, request  # type: ignore
 
@@ -51,6 +52,7 @@ async def get_area():
     except (TypeError, ValueError):
         return jsonify({"msg": "Invalid parameter"}), 400
 
-    return current_app.directions_service.get_area(
+    area = current_app.directions_service.get_area(
         maxDuration=maxDuration, alpha=alpha, hullbuffer=hullbuffer
     )
+    return geopandas.GeoSeries(area).to_json()
