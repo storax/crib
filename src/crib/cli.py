@@ -83,15 +83,16 @@ def browse(obj) -> None:
 
 
 @main.command()
-@click.option("--min-samples", type=int)
-@click.option("--leaf-size", type=int)
-@click.option("--eps", type=float)
+@click.option("--max-duration", type=int)
+@click.option("--hullbuffer", type=float)
 @click.option("--alpha", type=int)
 @click.pass_obj
-def get_area(obj, min_samples, leaf_size, eps, alpha) -> None:
+def get_area(obj, max_duration, hullbuffer, alpha) -> None:
     """Cluster directions."""
-    obj.directions_service.get_area(
-        eps=eps, min_samples=min_samples, leaf_size=leaf_size, alpha=alpha
+    click.echo(
+        obj.directions_service.get_area(
+            max_duration=max_duration, hullbuffer=hullbuffer, alpha=alpha
+        )
     )
 
 

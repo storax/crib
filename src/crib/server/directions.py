@@ -53,6 +53,6 @@ async def get_area():
         return jsonify({"msg": "Invalid parameter"}), 400
 
     area = current_app.directions_service.get_area(
-        maxDuration=maxDuration, alpha=alpha, hullbuffer=hullbuffer
+        max_duration=maxDuration, alpha=alpha, hullbuffer=hullbuffer
     )
     return geopandas.GeoSeries(area).to_json()

@@ -5,7 +5,9 @@ import abc
 import itertools
 from typing import Any, Dict, Iterable, Type, TypeVar
 
+import geopandas
 import pymongo  # type: ignore
+from shapely import geometry
 
 import crib
 from crib import exceptions, plugins
@@ -48,7 +50,9 @@ class PropertyRepo(plugins.Plugin):
         pass
 
     @abc.abstractmethod
-    def find(self, max_price=None, favorite=None, limit=None) -> Iterable[Property]:
+    def find(
+        self, max_price=None, favorite=None, area=None, limit=None
+    ) -> Iterable[Property]:
         pass
 
 
@@ -99,11 +103,20 @@ class MemoryPropertyRepo(PropertyRepo):
     def count(self) -> int:
         return len(self._storage)
 
-    def find(self, max_price=None, favorite=None, limit=None) -> Iterable[Property]:
+    def find(
+        self, max_price=None, favorite=None, area=None, limit=None
+    ) -> Iterable[Property]:
         limit = limit or 1000
         max_price = max_price or 1450
-        predicate = lambda p: p.price.amount <= max_price and (
-            favorite is None or p.favorite == favorite
+        predicate = (
+            lambda p: p.price.amount <= max_price
+            and (favorite is None or p.favorite == favorite)
+            and (
+                area is None
+                or area.contains(
+                    geometry.Point(p.location.longitude, p.location.latitude)
+                )
+            )
         )
 
         props = (p for p in self._storage.values() if predicate(p))
@@ -117,6 +130,8 @@ class MongoPropertyRepo(PropertyRepo, mongo.MongoRepo):
 
     def _to_prop(self, data: Dict[str, Any]) -> Property:
         data.pop("_id")
+        coords = data["location"]["coordinates"]
+        data["location"] = {"longitude": coords[0], "latitude": coords[1]}
         return Property.fromdict(data)
 
     def exists(self, identity: str) -> bool:
@@ -150,7 +165,9 @@ class MongoPropertyRepo(PropertyRepo, mongo.MongoRepo):
         for data in self._props.find():
             yield self._to_prop(data)
 
-    def find(self, max_price=None, favorite=None, limit=None) -> Iterable[Property]:
+    def find(
+        self, max_price=None, favorite=None, area=None, limit=None
+    ) -> Iterable[Property]:
         max_price = max_price or 1450
         limit = limit or 5000
         params = {
@@ -161,6 +178,12 @@ class MongoPropertyRepo(PropertyRepo, mongo.MongoRepo):
         }
         if favorite is not None:
             params["favorite"] = {"$eq": favorite}
+
+        if area is not None:
+            geoarea = geopandas.GeoSeries(area).__geo_interface__["features"][0][
+                "geometry"
+            ]
+            params["location"] = {"$geoWithin": {"$geometry": geoarea}}
 
         queried_props = self._props.find(params)
         order_by = [("firstVisibleDate", pymongo.DESCENDING)]
