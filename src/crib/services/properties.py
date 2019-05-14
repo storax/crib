@@ -9,10 +9,12 @@ class PropertyService(plugins.Plugin):
     directions_service = injection.Dependency()
     property_repository = injection.Dependency()
 
-    def find(self, max_price=None, limit=None):
+    def find(self, max_price=None, favorite=None, limit=None):
         try:
             props = list(
-                self.property_repository.find(max_price=max_price, limit=limit)
+                self.property_repository.find(
+                    max_price=max_price, favorite=favorite, limit=limit
+                )
             )
         except exceptions.InvalidQuery as err:
             raise ValueError(str(err))

@@ -48,7 +48,7 @@ class PropertyRepo(plugins.Plugin):
         pass
 
     @abc.abstractmethod
-    def find(self, max_price=None, limit=None) -> Iterable[Property]:
+    def find(self, max_price=None, favorite=None, limit=None) -> Iterable[Property]:
         pass
 
 
@@ -99,11 +99,14 @@ class MemoryPropertyRepo(PropertyRepo):
     def count(self) -> int:
         return len(self._storage)
 
-    def find(self, max_price=None, limit=None) -> Iterable[Property]:
+    def find(self, max_price=None, favorite=None, limit=None) -> Iterable[Property]:
         limit = limit or 1000
         max_price = max_price or 1450
+        predicate = lambda p: p.price.amount <= max_price and (
+            favorite is None or p.favorite == favorite
+        )
 
-        props = (p for p in self._storage.values() if p.price.amount <= max_price)
+        props = (p for p in self._storage.values() if predicate(p))
         return itertools.islice(props, limit)
 
 
@@ -147,17 +150,19 @@ class MongoPropertyRepo(PropertyRepo, mongo.MongoRepo):
         for data in self._props.find():
             yield self._to_prop(data)
 
-    def find(self, max_price=None, limit=None) -> Iterable[Property]:
+    def find(self, max_price=None, favorite=None, limit=None) -> Iterable[Property]:
         max_price = max_price or 1450
-        limit = limit or 1000
-        queried_props = self._props.find(
-            {
-                "propertyImages.3": {"$exists": True},
-                "banned": {"$ne": True},
-                "students": {"$ne": True},
-                "price.amount": {"$lte": max_price},
-            }
-        )
+        limit = limit or 5000
+        params = {
+            "propertyImages.3": {"$exists": True},
+            "banned": {"$ne": True},
+            "students": {"$ne": True},
+            "price.amount": {"$lte": max_price},
+        }
+        if favorite is not None:
+            params["favorite"] = {"$eq": favorite}
+
+        queried_props = self._props.find(params)
         order_by = [("firstVisibleDate", pymongo.DESCENDING)]
         queried_props = queried_props.sort(order_by)
         queried_props = queried_props.limit(limit)

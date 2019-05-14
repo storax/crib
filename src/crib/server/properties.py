@@ -15,12 +15,15 @@ async def find():
     json = await request.json
     limit = json.get("limit")
     max_price = json.get("max_price")
+    favorite = json.get("favorite")
     max_duration = json.get("max_duration")
     area = current_app.directions_service.get_area(max_duration)
     try:
         props = [
             p.asdict()
-            for p in current_app.property_service.find(max_price=max_price, limit=limit)
+            for p in current_app.property_service.find(
+                max_price=max_price, favorite=favorite, limit=limit
+            )
             if area
             and area.contains(geometry.Point(p.location.longitude, p.location.latitude))
         ]
