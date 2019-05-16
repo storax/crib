@@ -134,20 +134,27 @@ class MongoPropertyRepo(PropertyRepo, mongo.MongoRepo):
         data["location"] = {"longitude": coords[0], "latitude": coords[1]}
         return Property.fromdict(data)
 
+    def _to_storage(self, prop: Property) -> Dict[str, Any]:
+        p = prop.asdict()
+        p["_id"] = prop.id
+        p["location"] = {
+            "type": "Point",
+            "coordinates": [p["location"]["longitude"], p["location"]["latitude"]],
+        }
+        return p
+
     def exists(self, identity: str) -> bool:
         return bool(self._props.find_one({"_id": identity}))
 
     def insert(self, prop: Property) -> None:
-        p = prop.asdict()
-        p["_id"] = prop.id
+        p = self._to_storage(prop)
         try:
             self._props.insert_one(p)
         except pymongo.errors.DuplicateKeyError:
             raise exceptions.DuplicateProperty(p)
 
     def update(self, prop: Property) -> None:
-        p = prop.asdict()
-        p["_id"] = prop.id
+        p = self._to_storage(prop)
         result = self._props.replace_one({"_id": prop.id}, p)
         if result.matched_count == 0:
             raise exceptions.EntityNotFound(prop.id)
