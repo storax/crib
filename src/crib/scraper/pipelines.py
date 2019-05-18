@@ -13,4 +13,7 @@ class CribPipeline(base.WithInjection):
     property_repository = injection.Dependency()
 
     def process_item(self, item, spider):
-        self.property_repository.insert(item["prop"])
+        if item["existing"]:
+            self.property_repository.update(item["prop"])
+        else:
+            self.property_repository.insert(item["prop"])

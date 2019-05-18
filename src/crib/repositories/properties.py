@@ -75,10 +75,7 @@ class MemoryPropertyRepo(PropertyRepo):
         return identity in self._storage
 
     def get(self, identity: str) -> Property:
-        try:
-            return self._storage[identity]
-        except KeyError:
-            raise exceptions.EntityNotFound(identity)
+        return self._storage.get(identity)
 
     def get_all(self) -> Iterable[Property]:
         for p in self._storage.values():
@@ -162,11 +159,7 @@ class MongoPropertyRepo(PropertyRepo, mongo.MongoRepo):
 
     def get(self, identity: str) -> Property:
         data = self._props.find_one({"_id": identity})
-        if data is None:
-            raise exceptions.EntityNotFound(identity)
-
-        prop = self._to_prop(data)
-        return prop
+        return self._to_prop(data) if data else None
 
     def get_all(self):
         for data in self._props.find():

@@ -10,3 +10,4 @@ import scrapy  # type: ignore
 
 class PropertyItem(scrapy.Item):
     prop = scrapy.Field()
+    existing = scrapy.Field()

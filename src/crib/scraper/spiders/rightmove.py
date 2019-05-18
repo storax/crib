@@ -39,19 +39,20 @@ class RightmoveSpider(base.WithInjection, scrapy.Spider):
         properties = model["properties"]
         for data in properties:
             _make_id(data)
-            if self.property_repository.exists(data["id"]):
+            existing = self.property_repository.get(data["id"])
+            if existing and existing.banned:
                 continue
-            callback = functools.partial(self.parse_property, data)
+            callback = functools.partial(self.parse_property, data, existing)
             yield response.follow(data["propertyUrl"], callback=callback)
 
-    def parse_property(self, data, response: Response) -> PR:
+    def parse_property(self, data, existing, response: Response) -> PR:
         data["propertyImages"] = self._get_property_images(response)
         data["floorplanImages"] = self._get_floorplan_images(response)
         data["lettingInformation"] = self._get_letting_information(response)
         data["keyFeatures"] = self._get_key_features(response)
         data["summary"] = self._get_summary(response)
-        prop = to_prop(data)
-        yield PropertyItem({"prop": prop})
+        prop = to_prop(data, existing)
+        yield PropertyItem({"prop": prop, "existing": existing})
 
     def _get_key_features(self, response: Response) -> List[str]:
         xpath = "//div[contains(@class,'key-features')]/ul/li/text()"
@@ -106,7 +107,7 @@ def _make_id(propmodel: Dict):
     propmodel["id"] = f"RM-{propmodel['id']}"
 
 
-def to_prop(data):
+def to_prop(data, existing=None):
     keys = (
         "bedrooms",
         "displayAddress",
@@ -140,6 +141,10 @@ def to_prop(data):
     }
 
     d = {k: conversions.get(k, identity)(data[k]) for k in keys}
+    if existing:
+        d["favorite"] = existing.favorite
+        if existing.toWork:
+            d["toWork"] = existing.toWork.asdict()
 
     return Property.fromdict(d)
 
