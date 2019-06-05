@@ -3,6 +3,8 @@ Property endpoints
 """
 from flask_jwt_extended import jwt_required  # type: ignore
 from quart import Blueprint, current_app, jsonify, request  # type: ignore
+from shapely.geometry import shape
+from shapely.ops import unary_union
 
 from crib import exceptions
 
@@ -16,7 +18,12 @@ async def find():
     max_price = json.get("max_price")
     favorite = json.get("favorite")
     max_duration = json.get("max_duration")
+
     area = current_app.directions_service.get_area(max_duration)
+    userarea = _geo_json_to_shape(json.get("area"))
+    if userarea:
+        area = area.intersection(userarea)
+
     try:
         props = [
             p.asdict()
@@ -87,3 +94,8 @@ async def ban():
         return jsonify({"msg": str(err)}), 400
 
     return jsonify({"msg": "success"}), 200
+
+
+def _geo_json_to_shape(data):
+    if data and data["features"]:
+        return unary_union([shape(f["geometry"]) for f in data["features"]])
