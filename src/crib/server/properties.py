@@ -99,3 +99,27 @@ async def ban():
 def _geo_json_to_shape(data):
     if data and data["features"]:
         return unary_union([shape(f["geometry"]) for f in data["features"]])
+
+
+@bp.route("/save_search_area", methods=["POST"])
+@jwt_required
+async def save_search_area():
+    json = await request.json
+    name = json.get("name")
+    geojson = json.get("geojson")
+    if name is None:
+        return jsonify({"msg": "name is missing"}), 400
+    if geojson is None:
+        return jsonify({"msg": "geojson is missing"}), 400
+
+    current_app.property_service.save_search_area(name, geojson)
+
+    return jsonify({"msg": "success"}), 200
+
+
+@bp.route("/get_search_areas", methods=["GET"])
+@jwt_required
+async def get_search_areas():
+    areas = current_app.property_service.get_search_areas()
+
+    return jsonify({"areas": areas}), 200

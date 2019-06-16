@@ -50,3 +50,9 @@ class PropertyService(plugins.Plugin):
 
     def clear_properties(self, banned=False, favorites=False):
         self.property_repository.clear(banned=banned, favorites=favorites)
+
+    def save_search_area(self, name: str, geojson):
+        self.property_repository.set_search_area(name, geojson)
+
+    def get_search_areas(self):
+        return self.property_repository.get_search_areas()

@@ -125,6 +125,10 @@ class MongoPropertyRepo(PropertyRepo, mongo.MongoRepo):
     def _props(self):
         return self.db.properties
 
+    @property
+    def _search_areas(self):
+        return self.db.search_areas
+
     def _to_prop(self, data: Dict[str, Any]) -> Property:
         data.pop("_id")
         coords = data["location"]["coordinates"]
@@ -210,6 +214,15 @@ class MongoPropertyRepo(PropertyRepo, mongo.MongoRepo):
 
     def count(self) -> int:
         return self._props.count()
+
+    def set_search_area(self, name: str, geojson) -> None:
+        self._search_areas.save({"_id": name, "name": name, "geojson": geojson})
+
+    def get_search_areas(self):
+        return [
+            {"name": a["name"], "geojson": a["geojson"]}
+            for a in self._search_areas.find({})
+        ]
 
 
 PR = TypeVar("PR", bound=PropertyRepo)
