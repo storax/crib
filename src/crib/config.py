@@ -42,7 +42,7 @@ class YamlLoader(AbstractConfigLoader):
         return ["yml", "yaml"]
 
     def load(self, cfginput: IO[str]) -> Dict[str, Any]:
-        return yaml.load(cfginput)
+        return yaml.safe_load(cfginput)
 
 
 def _load(loaders: List[AbstractConfigLoader], config: IO[str]) -> Dict[str, Any]:
@@ -117,8 +117,11 @@ class LoadedConfiguration(DefaultConfiguration):
     config_file = injection.Dependency()
 
     def load_usercfg(self):
-        with open(self.config_file, "r") as fp:
-            return _load(self.config_loaders, fp)
+        if self.config_file:
+            with open(self.config_file, "r") as fp:
+                return _load(self.config_loaders, fp)
+        else:
+            return {}
 
 
 class MemoryConfiguration(DefaultConfiguration):

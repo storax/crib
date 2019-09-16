@@ -4,6 +4,7 @@ import json
 from typing import Any, Dict, Iterable, List, Union
 from urllib import parse as urlparse
 
+import dateutil.parser
 import scrapy  # type: ignore
 from scrapy.http.response import Response  # type: ignore
 
@@ -150,7 +151,7 @@ def to_prop(data, existing=None):
 
 
 def _to_dt(string: str) -> datetime.datetime:
-    return datetime.datetime.strptime(string, "%Y-%m-%dT%H:%M:%S%z")
+    return dateutil.parser.parse(string)
 
 
 def _to_price(data: Dict) -> Dict[str, Any]:

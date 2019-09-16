@@ -45,12 +45,6 @@ def create_app(container):
     app = cors(app)
     app.config.from_mapping(app._crib_config)
 
-    # ensure the instance folder exists
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
-
     app.register_blueprint(properties.bp)
     app.register_blueprint(directions.bp)
     auth.init_app(app)
