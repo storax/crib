@@ -50,16 +50,14 @@ def scrape(obj):
 @click.option("--loglevel", default="DEBUG", help="The loglevel for scrapy.")
 @click.pass_obj
 def crawl(obj, spider: str, loglevel: str) -> None:
-    """Scrape with the given spider.
-    """
+    """Scrape with the given spider."""
     obj.scrape.crawl(spider, loglevel)
 
 
 @scrape.command(name="list")
 @click.pass_obj
 def list_scapers(obj) -> None:
-    """List all spiders.
-    """
+    """List all spiders."""
     for spider in obj.scrape.list_spiders():
         click.echo(spider)
 
@@ -131,11 +129,11 @@ def run(ctx):
 @server.command()
 @click.argument("username")
 @click.password_option("--password")
-@click.pass_context
-def add_user(ctx: click.Context, username: str, password: str) -> None:
-    container = ctx.obj
+@click.pass_obj
+def add_user(obj, username: str, password: str) -> None:
+    app = obj.load_app()
     try:
-        container.auth_service.register(username, password)
+        app.auth_service.register(username, password)
     except exceptions.DuplicateUser:
         raise click.UsageError(f"User {username} already exists")
     except ValueError as err:

@@ -6,10 +6,10 @@ from quart import Blueprint, current_app, jsonify, request  # type: ignore
 
 from crib import exceptions
 
-bp = Blueprint("scrape", __name__, url_prefix="/scape")
+bp = Blueprint("scrape", __name__, url_prefix="/scrape")
 
 
-@bp.route("/scrape", methods=["POST"])
+@bp.route("/scrape", methods=["POST"], endpoint="scrape")
 @jwt_required
 async def scrape():
     json = await request.json

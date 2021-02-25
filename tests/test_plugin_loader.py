@@ -28,23 +28,20 @@ def test_plugin_not_found():
 
 
 def test_plugins_provider_uninitialized():
-    """Test accessing a plugin provider on a class.
-    """
+    """Test accessing a plugin provider on a class."""
     testapp = make_app()
     assert isinstance(testapp.config_loaders, PluginsProvider)
 
 
 def test_plugins_provider_cache(testapp):
-    """Test accessing plugins multiple times.
-    """
+    """Test accessing plugins multiple times."""
     plugins = testapp.config_loaders
     plugins2 = testapp.config_loaders
     assert plugins is plugins2
 
 
 def test_plugins_provider_cache_per_instance(testapp):
-    """Test plugins cache is per container instance.
-    """
+    """Test plugins cache is per container instance."""
     testapp2 = make_app()()
     plugins = testapp.config_loaders
     plugins2 = testapp2.config_loaders
@@ -52,8 +49,7 @@ def test_plugins_provider_cache_per_instance(testapp):
 
 
 def test_plugins_provider_cache_weakref(testapp):
-    """Test plugins cache doesn't cause memory leaks.
-    """
+    """Test plugins cache doesn't cause memory leaks."""
     container = make_app()
     testapp2 = container()
     testapp2.config_loaders

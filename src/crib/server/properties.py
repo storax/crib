@@ -11,7 +11,7 @@ from crib import exceptions
 bp = Blueprint("properties", __name__, url_prefix="/properties")
 
 
-@bp.route("/find", methods=["POST"])
+@bp.route("/find", methods=["POST"], endpoint="find")
 @jwt_required
 async def find():
     json = await request.json
@@ -37,7 +37,7 @@ async def find():
     return jsonify(props)
 
 
-@bp.route("/to_work", methods=["GET"])
+@bp.route("/to_work", methods=["GET"], endpoint="to_work")
 @jwt_required
 async def to_work():
     args = request.args
@@ -59,7 +59,7 @@ async def to_work():
     return jsonify(route)
 
 
-@bp.route("/favorite", methods=["PUT"])
+@bp.route("/favorite", methods=["PUT"], endpoint="favorite")
 @jwt_required
 async def favorite():
     json = await request.json
@@ -78,7 +78,7 @@ async def favorite():
     return jsonify({"msg": "success"}), 200
 
 
-@bp.route("/ban", methods=["PUT"])
+@bp.route("/ban", methods=["PUT"], endpoint="ban")
 @jwt_required
 async def ban():
     json = await request.json
@@ -102,7 +102,7 @@ def _geo_json_to_shape(data):
         return unary_union([shape(f["geometry"]) for f in data["features"]])
 
 
-@bp.route("/save_search_area", methods=["POST"])
+@bp.route("/save_search_area", methods=["POST"], endpoint="save_search_area")
 @jwt_required
 async def save_search_area():
     json = await request.json
@@ -118,7 +118,7 @@ async def save_search_area():
     return jsonify({"msg": "success"}), 200
 
 
-@bp.route("/get_search_areas", methods=["GET"])
+@bp.route("/get_search_areas", methods=["GET"], endpoint="get_search_areas")
 @jwt_required
 async def get_search_areas():
     areas = current_app.property_service.get_search_areas()

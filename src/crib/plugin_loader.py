@@ -49,7 +49,7 @@ class CribSpec:
 
     @hookspec
     def crib_add_config_loaders(
-        self
+        self,
     ) -> List[config.AbstractConfigLoader]:  # pragma: no cover
         """Add config loaders
 
@@ -84,8 +84,7 @@ hook = _plugin_manager.hook
 
 
 class PluginsProvider(AbstractProvider):
-    """Provides a list of components through a plugin hook.
-    """
+    """Provides a list of components through a plugin hook."""
 
     def __init__(self, hook):
         super().__init__()

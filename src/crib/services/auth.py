@@ -14,7 +14,7 @@ class AuthService(injection.Component):
     user_repository = injection.Dependency()
 
     def register(self, username, password):
-        if not (isinstance(password, str) and len(password) < 4):
+        if not (isinstance(password, str) and len(password) >= 4):
             raise ValueError("Password should be a string of 4+ characters.")
 
         password = generate_password_hash(password)

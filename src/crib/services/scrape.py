@@ -5,7 +5,7 @@ from crib import exceptions, injection, plugins
 log = logging.getLogger(__name__)
 
 
-class ScapeService(plugins.Plugin):
+class ScrapeService(plugins.Plugin):
     _scrape = injection.Dependency("scrape")
 
     def scrape(self, search):

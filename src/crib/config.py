@@ -86,8 +86,7 @@ def _merge_config(default: Dict, override: Dict) -> Dict:
 
 
 class DefaultConfiguration(injection.Component):
-    """Default configuration of crib.
-    """
+    """Default configuration of crib."""
 
     config_loaders = injection.Dependency()
 
@@ -111,8 +110,7 @@ class DefaultConfiguration(injection.Component):
 
 
 class LoadedConfiguration(DefaultConfiguration):
-    """Configuration which is loaded through a config loader component.
-    """
+    """Configuration which is loaded through a config loader component."""
 
     config_file = injection.Dependency()
 
@@ -125,8 +123,7 @@ class LoadedConfiguration(DefaultConfiguration):
 
 
 class MemoryConfiguration(DefaultConfiguration):
-    """Canned config which is merged with the default config.
-    """
+    """Canned config which is merged with the default config."""
 
     config_overrides = injection.Dependency()
 

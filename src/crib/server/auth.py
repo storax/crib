@@ -4,8 +4,7 @@ from flask_jwt_extended import (  # type: ignore
     JWTManager,
     create_access_token,
     get_jwt_identity,
-    get_raw_jwt,
-    jwt_refresh_token_required,
+    get_jwt,
     jwt_required,
 )
 from quart import Blueprint, current_app, jsonify, request  # type: ignore
@@ -22,13 +21,13 @@ def init_app(app):
     jwt.init_app(app)
 
 
-@jwt.token_in_blacklist_loader
-def check_if_token_in_blacklist(decrypted_token):
-    jti = decrypted_token["jti"]
+@jwt.token_in_blocklist_loader
+def check_if_token_in_blacklist(jwt_header, jwt_payload):
+    jti = jwt_header["jti"]
     return jti in blacklist
 
 
-@bp.route("/login", methods=["POST"])
+@bp.route("/login", methods=["POST"], endpoint="login")
 async def login():
     if not request.is_json:
         return jsonify({"msg": "Missing JSON in request"}), 400
@@ -49,8 +48,8 @@ async def login():
     return jsonify(tokens), 200
 
 
-@bp.route("/refresh", methods=["POST"])
-@jwt_refresh_token_required
+@bp.route("/refresh", methods=["POST"], endpoint="refresh")
+@jwt_required(refresh=True)
 async def refresh():
     current_user = get_jwt_identity()
     ret = {"access_token": create_access_token(identity=current_user)}
@@ -58,18 +57,18 @@ async def refresh():
 
 
 # Endpoint for revoking the current users access token
-@bp.route("/logout", methods=["DELETE"])
+@bp.route("/logout", methods=["DELETE"], endpoint="logout")
 @jwt_required
 async def logout():
-    jti = get_raw_jwt()["jti"]
+    jti = get_jwt()["jti"]
     blacklist.add(jti)
     return jsonify({"msg": "Successfully logged out"}), 200
 
 
 # Endpoint for revoking the current users refresh token
-@bp.route("/logout2", methods=["DELETE"])
-@jwt_refresh_token_required
+@bp.route("/logout2", methods=["DELETE"], endpoint="logout2")
+@jwt_required(refresh=True)
 async def logout2():
-    jti = get_raw_jwt()["jti"]
+    jti = get_jwt()["jti"]
     blacklist.add(jti)
     return jsonify({"msg": "Successfully logged out"}), 200
