@@ -9,7 +9,7 @@ from quart_cors import cors  # type: ignore
 
 from crib import injection
 
-from . import auth, directions, properties
+from . import auth, directions, properties, scrape
 
 
 class Flask(injection.Component, Quart):
@@ -20,6 +20,7 @@ class Flask(injection.Component, Quart):
     directions_repository = injection.Dependency()
     property_service = injection.Dependency()
     auth_service = injection.Dependency()
+    scrape_service = injection.Dependency()
 
     def __init__(self, *args, **kwargs):
         self._name = None
@@ -47,6 +48,7 @@ def create_app(container):
 
     app.register_blueprint(properties.bp)
     app.register_blueprint(directions.bp)
+    app.register_blueprint(scrape.bp)
     auth.init_app(app)
 
     return app

@@ -16,15 +16,20 @@ class Scraper(injection.Component):
         self.settings = Settings()
         self.settings.setdict(self.config)
         self.settings.set("CONTAINER", container)
+        self._process = None
 
-    def crawl(self, spider, loglevel):
+    def crawl(self, spider, loglevel, settings_override=None):
+        if self._process:
+            self.process.stop()
         settings = self.settings.copy()
+        if settings_override:
+            settings.update(settings_override, priority="cmdline")
         if loglevel:
             settings.set("LOG_ENABLED", True, priority="cmdline")
             settings.set("LOG_LEVEL", loglevel, priority="cmdline")
-        process = CrawlerProcess(settings)
-        process.crawl(spider)
-        process.start()
+        self._process = CrawlerProcess(settings)
+        self._process.crawl(spider)
+        self._process.start()
 
     def list_spiders(self):
         loader = SpiderLoader.from_settings(self.settings)

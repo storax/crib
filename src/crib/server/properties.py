@@ -12,6 +12,7 @@ bp = Blueprint("properties", __name__, url_prefix="/properties")
 
 
 @bp.route("/find", methods=["POST"])
+@jwt_required
 async def find():
     json = await request.json
     limit = json.get("limit")
