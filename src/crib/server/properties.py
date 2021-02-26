@@ -12,7 +12,7 @@ bp = Blueprint("properties", __name__, url_prefix="/properties")
 
 
 @bp.route("/find", methods=["POST"], endpoint="find")
-@jwt_required
+@jwt_required()
 async def find():
     json = await request.json
     limit = json.get("limit")
@@ -38,7 +38,7 @@ async def find():
 
 
 @bp.route("/to_work", methods=["GET"], endpoint="to_work")
-@jwt_required
+@jwt_required()
 async def to_work():
     args = request.args
     prop_id = args.get("prop_id")
@@ -60,7 +60,7 @@ async def to_work():
 
 
 @bp.route("/favorite", methods=["PUT"], endpoint="favorite")
-@jwt_required
+@jwt_required()
 async def favorite():
     json = await request.json
     prop_id = json.get("prop_id")
@@ -79,7 +79,7 @@ async def favorite():
 
 
 @bp.route("/ban", methods=["PUT"], endpoint="ban")
-@jwt_required
+@jwt_required()
 async def ban():
     json = await request.json
     prop_id = json.get("prop_id")
@@ -103,7 +103,7 @@ def _geo_json_to_shape(data):
 
 
 @bp.route("/save_search_area", methods=["POST"], endpoint="save_search_area")
-@jwt_required
+@jwt_required()
 async def save_search_area():
     json = await request.json
     name = json.get("name")
@@ -119,7 +119,7 @@ async def save_search_area():
 
 
 @bp.route("/get_search_areas", methods=["GET"], endpoint="get_search_areas")
-@jwt_required
+@jwt_required()
 async def get_search_areas():
     areas = current_app.property_service.get_search_areas()
 

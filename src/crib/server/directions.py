@@ -12,21 +12,21 @@ log = logging.getLogger(__name__)
 
 
 @bp.route("/raster_map", methods=["GET"], endpoint="raster_map")
-@jwt_required
+@jwt_required()
 async def raster_map():
     raster = list(current_app.directions_service.raster_map())
     return jsonify(raster)
 
 
 @bp.route("/colormaps", methods=["GET"], endpoint="colormaps")
-@jwt_required
+@jwt_required()
 async def colormaps():
     maps = list(current_app.directions_service.colormaps())
     return jsonify(maps)
 
 
 @bp.route("/to_work_durations", methods=["GET"], endpoint="to_work_durations")
-@jwt_required
+@jwt_required()
 async def to_work_durations():
     maxDuration = request.args.get("maxDuration", 3000, int)
     colormap = request.args.get("colormap", "thermal_r")
@@ -40,7 +40,7 @@ async def to_work_durations():
 
 
 @bp.route("/get_area", methods=["GET"], endpoint="get_area")
-@jwt_required
+@jwt_required()
 async def get_area():
     maxDuration = request.args.get("maxDuration", 42 * 60)
     alpha = request.args.get("alpha", None)

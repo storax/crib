@@ -13,4 +13,4 @@ class ScrapeService(plugins.Plugin):
         settings = {
             "RIGHTMOVE_SEARCHES": [search],
         }
-        self._scrape.crawl(spider, loglevel="INFO", settings=settings)
+        self._scrape.crawl(spider, loglevel="INFO", settings_override=settings)

@@ -80,7 +80,9 @@ class RightmoveSpider(base.WithInjection, scrapy.Spider):
 
 
 def _load_model(response: Response) -> Dict:
-    script = response.xpath("/html/body/script[1]/text()").extract_first()
+    script = response.xpath(
+        "/html/body/script[text()[contains(.,'window.jsonModel = ')]]/text()"
+    ).extract_first()
     jsmodel = script[len("window.jsonModel = ") :]
     model = json.loads(jsmodel)
     return model

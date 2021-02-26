@@ -92,6 +92,8 @@ class MongoDirectionsRepo(DirectionsRepo, mongo.MongoRepo):
 
     def insert_to_work_area(self, max_duration: int, area):
         areajson = geopandas.GeoSeries(area).__geo_interface__
+        if not areajson["features"]:
+            return
         areadata = areajson["features"][0]["geometry"]
         self._work_areas.insert_one({"max_duration": max_duration, "area": areadata})
 

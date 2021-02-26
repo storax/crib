@@ -23,7 +23,7 @@ def init_app(app):
 
 @jwt.token_in_blocklist_loader
 def check_if_token_in_blacklist(jwt_header, jwt_payload):
-    jti = jwt_header["jti"]
+    jti = jwt_payload["jti"]
     return jti in blacklist
 
 
@@ -58,7 +58,7 @@ async def refresh():
 
 # Endpoint for revoking the current users access token
 @bp.route("/logout", methods=["DELETE"], endpoint="logout")
-@jwt_required
+@jwt_required()
 async def logout():
     jti = get_jwt()["jti"]
     blacklist.add(jti)

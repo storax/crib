@@ -20,7 +20,7 @@ class Scraper(injection.Component):
 
     def crawl(self, spider, loglevel, settings_override=None):
         if self._process:
-            self.process.stop()
+            self._process.stop()
         settings = self.settings.copy()
         if settings_override:
             settings.update(settings_override, priority="cmdline")
