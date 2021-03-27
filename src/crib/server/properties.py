@@ -22,8 +22,11 @@ async def find():
 
     area = current_app.directions_service.get_area(max_duration)
     userarea = _geo_json_to_shape(json.get("area"))
-    if userarea:
-        area = area.intersection(userarea)
+    if area:
+        if userarea:
+            area = area.intersection(userarea)
+    else:
+        area = userarea
 
     try:
         props = [
