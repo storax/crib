@@ -102,6 +102,8 @@ class MongoDirectionsRepo(DirectionsRepo, mongo.MongoRepo):
         if not result:
             return None
         data = result["area"]
+        if not data:
+            return None
         area = shape(data)
         return area
 

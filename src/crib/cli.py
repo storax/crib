@@ -144,7 +144,8 @@ def add_user(obj, username: str, password: str) -> None:
 
 @server.command()
 @click.argument("mode", type=click.Choice(["transit"]))
-@click.pass_context
-def fetch_to_work(ctx: click.Context, mode) -> None:
+@click.pass_obj
+def fetch_to_work(obj, mode) -> None:
+    app = obj.load_app()
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(ctx.obj.directions_service.fetch_map_to_work(mode))
+    loop.run_until_complete(app.directions_service.fetch_map_to_work(mode))

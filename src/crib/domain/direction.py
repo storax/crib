@@ -27,7 +27,7 @@ class Distance:
 
 @attr.s(frozen=True)
 class Duration:
-    value: str = attr.ib()
+    value: int = attr.ib()
     text: str = attr.ib()
 
 
